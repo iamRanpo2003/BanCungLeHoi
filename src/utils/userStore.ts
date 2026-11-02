@@ -2,7 +2,7 @@ import { UserProfile } from '../types/festival';
 
 export const DEFAULT_USER: UserProfile = {
   id: 'usr-default',
-  fullName: 'Nguyễn Văn Hải',
+  fullName: 'Nguyễn Viết Hải',
   email: 'hai2752003hai@gmail.com',
   phone: '0987654321',
   role: 'user',

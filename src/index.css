@@ -1,11 +1,124 @@
 @import "tailwindcss";
 
 @layer base {
+  :root {
+    --heritage-red: #8b1515;
+    --heritage-gold: #b45309;
+    --paper-bg: #fcfbf7;
+  }
+
   body {
     font-family: 'Be Vietnam Pro', 'Plus Jakarta Sans', 'Noto Sans', 'DejaVu Sans', system-ui, -apple-system, sans-serif;
-    color: #0f172a;
-    background-color: #f8fafc;
+    color: #1e293b;
+    background-color: #fdfbf7;
+    transition: background-color 0.2s ease, color 0.2s ease, font-size 0.2s ease;
   }
+}
+
+/* Vietnamese Heritage Cultural Styling */
+.heritage-gradient-bar {
+  background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 50%, #b45309 100%);
+}
+
+.heritage-card {
+  background-color: #ffffff;
+  border: 1px solid #fed7aa;
+  box-shadow: 0 2px 10px -2px rgba(139, 21, 21, 0.05);
+}
+
+/* Custom Accessibility: Font Scaling */
+.text-scale-large {
+  font-size: 112%;
+}
+
+.text-scale-large p,
+.text-scale-large span,
+.text-scale-large button,
+.text-scale-large input,
+.text-scale-large select,
+.text-scale-large textarea {
+  font-size: 1.08em;
+  line-height: 1.65;
+}
+
+.text-scale-xlarge {
+  font-size: 125%;
+}
+
+.text-scale-xlarge p,
+.text-scale-xlarge span,
+.text-scale-xlarge button,
+.text-scale-xlarge input,
+.text-scale-xlarge select,
+.text-scale-xlarge textarea {
+  font-size: 1.18em;
+  line-height: 1.75;
+}
+
+/* Custom Accessibility: High Contrast (WCAG AAA - Black & Gold/White) */
+.high-contrast {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.high-contrast header,
+.high-contrast nav,
+.high-contrast main,
+.high-contrast section,
+.high-contrast article,
+.high-contrast footer,
+.high-contrast .bg-white,
+.high-contrast .bg-slate-50,
+.high-contrast .bg-amber-50,
+.high-contrast .bg-red-50,
+.high-contrast .bg-orange-50 {
+  background-color: #0a0a0a !important;
+  color: #ffffff !important;
+  border-color: #facc15 !important;
+}
+
+.high-contrast h1,
+.high-contrast h2,
+.high-contrast h3,
+.high-contrast h4,
+.high-contrast strong,
+.high-contrast b {
+  color: #fef08a !important;
+}
+
+.high-contrast p,
+.high-contrast span,
+.high-contrast div,
+.high-contrast label,
+.high-contrast li {
+  color: #ffffff !important;
+}
+
+.high-contrast .text-slate-500,
+.high-contrast .text-slate-600,
+.high-contrast .text-slate-700,
+.high-contrast .text-slate-800,
+.high-contrast .text-gray-500,
+.high-contrast .text-gray-600 {
+  color: #fef08a !important;
+}
+
+.high-contrast button,
+.high-contrast input,
+.high-contrast select,
+.high-contrast textarea {
+  background-color: #171717 !important;
+  color: #ffffff !important;
+  border: 2px solid #facc15 !important;
+}
+
+.high-contrast button.bg-red-700,
+.high-contrast button.bg-red-800,
+.high-contrast button.bg-amber-600,
+.high-contrast button.bg-blue-600 {
+  background-color: #facc15 !important;
+  color: #000000 !important;
+  font-weight: 800 !important;
 }
 
 /* Custom scrollbars */
@@ -15,14 +128,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #f7f3ec;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #d6cfbf;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #b5aa94;
 }

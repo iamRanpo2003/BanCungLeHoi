@@ -61,7 +61,7 @@ export const SplashAuthModal: React.FC<SplashAuthModalProps> = ({
   const handleQuickDemo = (demoRole: 'user' | 'admin') => {
     const updated: UserProfile = {
       ...user,
-      fullName: demoRole === 'admin' ? 'Ban Quản Trị Di Sản' : 'Nguyễn Văn Hải (Nghiên cứu viên)',
+      fullName: demoRole === 'admin' ? 'Ban Quản Trị Di Sản' : 'Nguyễn Viết Hải (Nghiên cứu viên)',
       email: demoRole === 'admin' ? 'admin@bancunglehoi.gov.vn' : 'hai2752003hai@gmail.com',
       role: demoRole,
       interests: selectedInterests.length > 0 ? selectedInterests : INTEREST_OPTIONS.slice(0, 4),
@@ -140,7 +140,7 @@ export const SplashAuthModal: React.FC<SplashAuthModalProps> = ({
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Ví dụ: Nguyễn Văn Hải"
+                    placeholder="Ví dụ: Nguyễn Viết Hải"
                     className="w-full text-sm px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
                   />
                 </div>

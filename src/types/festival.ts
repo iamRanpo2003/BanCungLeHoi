@@ -11,6 +11,24 @@ export interface RitualInfo {
   hoi: string[]; // Phần Hội (trò chơi dân gian, diễn xướng nghệ thuật, ẩm thực...)
 }
 
+export interface FestivalTranslation {
+  name: string;
+  alternateNames?: string[];
+  category: string;
+  ethnicGroup: string;
+  region: string;
+  province: string;
+  locationName: string;
+  recurringNote?: string;
+  historicalOrigin: string;
+  culturalMeaning: string;
+  mainRituals: RitualInfo;
+  legalRecognitionType?: string;
+  directionsGuide: string;
+  visitorAdvice: string[];
+  tags: string[];
+}
+
 export interface FestivalEvent {
   id: string;
   name: string;
@@ -57,6 +75,7 @@ export interface FestivalEvent {
   unescoRecognized?: boolean;
   nationalHeritage?: boolean;
   tags: string[];
+  en?: FestivalTranslation; // Bản dịch tiếng Anh cho người nước ngoài
 }
 
 export interface CalculatedEventInstance {
@@ -100,6 +119,7 @@ export interface LegalDocument {
   summary: string;
   keyArticles: string[];
   linkRef?: string;
+  enSummary?: string;
 }
 
 export interface UserProfile {
@@ -125,4 +145,15 @@ export interface InternshipConfig {
   school: string;
   partnerCompany: string;
   batch: string;
+}
+
+export type AppLanguage = 'vi' | 'en';
+
+export type FontSizeScale = 'normal' | 'large' | 'xlarge';
+
+export interface AccessibilitySettings {
+  fontSize: FontSizeScale;
+  highContrast: boolean;
+  speechRate: number; // 0.8, 1.0, 1.25
+  isSpeaking?: boolean;
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Users,
   PenTool,
@@ -12,58 +12,119 @@ import {
   X,
   Plus,
 } from 'lucide-react';
-import { CommunityStory, FestivalEvent, UserProfile } from '../types/festival';
+import { CommunityStory, FestivalEvent, UserProfile, AppLanguage } from '../types/festival';
 import { getStoredStories, saveStory, likeStory } from '../data/communityData';
 import { LEGAL_DISCLAIMER } from '../data/legalReferences';
+import {
+  getSavedStoryDraft,
+  saveStoryDraft,
+  clearStoryDraft,
+  StoryFormDraft,
+} from '../utils/storage';
+import { getTranslation } from '../utils/i18n';
 
 interface CommunityStoriesViewProps {
   festivals: FestivalEvent[];
   user: UserProfile;
+  lang?: AppLanguage;
 }
 
-export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({ festivals, user }) => {
+export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
+  festivals,
+  user,
+  lang = 'vi',
+}) => {
+  const t = getTranslation(lang);
   const [stories, setStories] = useState<CommunityStory[]>(() => getStoredStories());
   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
   const [filterType, setFilterType] = useState<'all' | 'my' | 'pending'>('all');
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  // Form states
-  const [title, setTitle] = useState('');
-  const [authorName, setAuthorName] = useState(user.fullName || 'Người yêu văn hóa');
-  const [authorRole, setAuthorRole] = useState('Du khách trẩy hội');
-  const [selectedFestivalId, setSelectedFestivalId] = useState(festivals[0]?.id || '');
-  const [province, setProvince] = useState(festivals[0]?.province || 'Phú Thọ');
-  const [ethnicGroup, setEthnicGroup] = useState('Kinh');
-  const [content, setContent] = useState('');
-  const [sourceReference, setSourceReference] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  // Initialize draft from LocalStorage persistence!
+  const savedDraft = getSavedStoryDraft();
+  const [title, setTitle] = useState(savedDraft.title || '');
+  const [authorName, setAuthorName] = useState(
+    savedDraft.authorName || user.fullName || (lang === 'vi' ? 'Người yêu văn hóa' : 'Cultural Enthusiast')
+  );
+  const [authorRole, setAuthorRole] = useState(
+    savedDraft.authorRole || (lang === 'vi' ? 'Du khách trẩy hội' : 'Visitor')
+  );
+  const [selectedFestivalId, setSelectedFestivalId] = useState(
+    savedDraft.festivalId || festivals[0]?.id || ''
+  );
+  const [province, setProvince] = useState(
+    savedDraft.province || festivals[0]?.province || 'Phú Thọ'
+  );
+  const [ethnicGroup, setEthnicGroup] = useState(savedDraft.ethnicGroup || 'Kinh');
+  const [content, setContent] = useState(savedDraft.content || '');
+  const [sourceReference, setSourceReference] = useState(savedDraft.sourceReference || '');
+  const [imageUrl, setImageUrl] = useState(savedDraft.imageUrl || '');
+
+  // Auto-save form draft on every input change
+  const handleDraftChange = (field: keyof StoryFormDraft, value: string) => {
+    if (field === 'title') setTitle(value);
+    if (field === 'authorName') setAuthorName(value);
+    if (field === 'authorRole') setAuthorRole(value);
+    if (field === 'festivalId') setSelectedFestivalId(value);
+    if (field === 'province') setProvince(value);
+    if (field === 'ethnicGroup') setEthnicGroup(value);
+    if (field === 'content') setContent(value);
+    if (field === 'sourceReference') setSourceReference(value);
+    if (field === 'imageUrl') setImageUrl(value);
+
+    saveStoryDraft({
+      title: field === 'title' ? value : title,
+      authorName: field === 'authorName' ? value : authorName,
+      authorRole: field === 'authorRole' ? value : authorRole,
+      festivalId: field === 'festivalId' ? value : selectedFestivalId,
+      province: field === 'province' ? value : province,
+      ethnicGroup: field === 'ethnicGroup' ? value : ethnicGroup,
+      content: field === 'content' ? value : content,
+      sourceReference: field === 'sourceReference' ? value : sourceReference,
+      imageUrl: field === 'imageUrl' ? value : imageUrl,
+    });
+  };
 
   const handleLike = (storyId: string) => {
     likeStory(storyId);
     setStories(getStoredStories());
   };
 
+  const isValidHttpUrl = (urlStr: string): boolean => {
+    try {
+      const parsed = new URL(urlStr);
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  };
+
   const handleSubmitStory = (e: React.FormEvent) => {
     e.preventDefault();
     const chosenFest = festivals.find((f) => f.id === selectedFestivalId);
+    const safeImage =
+      imageUrl.trim() && isValidHttpUrl(imageUrl.trim())
+        ? imageUrl.trim()
+        : 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80';
+
     saveStory({
-      title,
-      authorName,
+      title: title.trim(),
+      authorName: authorName.trim(),
       authorRole,
       festivalId: selectedFestivalId,
-      festivalName: chosenFest ? chosenFest.name : 'Lễ hội dân gian địa phương',
+      festivalName: chosenFest ? (lang === 'en' && chosenFest.en?.name ? chosenFest.en.name : chosenFest.name) : 'Lễ hội dân gian địa phương',
       province: province || chosenFest?.province || 'Toàn quốc',
       ethnicGroup,
-      content,
-      images: imageUrl.trim()
-        ? [imageUrl.trim()]
-        : ['https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80'],
+      content: content.trim(),
+      images: [safeImage],
       tags: [chosenFest?.province || 'Văn hóa', ethnicGroup, 'Cộng đồng'],
       sourceReference: sourceReference.trim() || 'Tư liệu điền dã dân gian của tác giả',
     });
 
     setStories(getStoredStories());
     setSubmitSuccess(true);
+    clearStoryDraft();
+
     setTimeout(() => {
       setSubmitSuccess(false);
       setIsSubmitOpen(false);
@@ -77,34 +138,33 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({ fest
   const displayedStories = stories.filter((s) => {
     if (filterType === 'pending') return s.status === 'pending';
     if (filterType === 'my') return s.authorName === user.fullName;
-    // 'all' shows approved, plus user's own pending
     return s.status === 'approved' || s.authorName === user.fullName;
   });
 
   return (
     <div className="space-y-6 pb-12">
       {/* Header */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white p-6 rounded-3xl border border-amber-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-blue-50 text-blue-600">
+            <span className="p-2 rounded-xl bg-red-50 text-red-700">
               <Users className="w-5 h-5" />
             </span>
-            <h1 className="text-2xl font-black text-slate-900 font-sans">
-              Khám Phá & Đóng Góp Cộng Đồng
+            <h1 className="text-2xl font-black text-stone-900 font-serif">
+              {t.community.title}
             </h1>
           </div>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Không gian chia sẻ trải nghiệm trẩy hội, hình ảnh check-in và tư liệu lịch sử dân gian 54 dân tộc
+          <p className="text-xs sm:text-sm text-stone-500 mt-1">
+            {t.community.subtitle}
           </p>
         </div>
 
         <button
           onClick={() => setIsSubmitOpen(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-blue-500/20 transition cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2.5 bg-red-700 hover:bg-red-800 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-red-700/20 transition cursor-pointer"
         >
           <PenTool className="w-4 h-4" />
-          <span>Đóng góp câu chuyện văn hóa</span>
+          <span>{t.community.contributeBtn}</span>
         </button>
       </div>
 
@@ -114,296 +174,210 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({ fest
           onClick={() => setFilterType('all')}
           className={`px-4 py-2 text-xs font-bold rounded-xl transition ${
             filterType === 'all'
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+              ? 'bg-red-700 text-white shadow-xs'
+              : 'bg-white text-stone-600 hover:bg-stone-50 border border-stone-200'
           }`}
         >
-          Tất cả câu chuyện ({stories.filter((s) => s.status === 'approved').length})
+          {lang === 'vi' ? 'Tất cả câu chuyện' : 'All Stories'}
         </button>
         <button
           onClick={() => setFilterType('my')}
           className={`px-4 py-2 text-xs font-bold rounded-xl transition ${
             filterType === 'my'
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+              ? 'bg-red-700 text-white shadow-xs'
+              : 'bg-white text-stone-600 hover:bg-stone-50 border border-stone-200'
           }`}
         >
-          Bài viết của tôi
+          {lang === 'vi' ? 'Bài viết của tôi' : 'My Contributions'}
         </button>
-        <button
-          onClick={() => setFilterType('pending')}
-          className={`px-4 py-2 text-xs font-bold rounded-xl transition ${
-            filterType === 'pending'
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
-          }`}
-        >
-          Chờ kiểm duyệt ({stories.filter((s) => s.status === 'pending').length})
-        </button>
-      </div>
-
-      {/* Stories Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {displayedStories.map((story) => (
-          <article
-            key={story.id}
-            className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition flex flex-col justify-between"
+        {user.role === 'admin' && (
+          <button
+            onClick={() => setFilterType('pending')}
+            className={`px-4 py-2 text-xs font-bold rounded-xl transition ${
+              filterType === 'pending'
+                ? 'bg-amber-600 text-white shadow-xs'
+                : 'bg-white text-stone-600 hover:bg-stone-50 border border-stone-200'
+            }`}
           >
-            <div>
-              {/* Image banner */}
-              {story.images && story.images.length > 0 && (
-                <div className="relative h-48 w-full bg-slate-900 overflow-hidden">
-                  <img
-                    src={story.images[0]}
-                    alt={story.title}
-                    className="w-full h-full object-cover opacity-90"
-                  />
-                  <div className="absolute top-3 right-3">
-                    {story.status === 'approved' ? (
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-600 text-white flex items-center gap-1 shadow-xs">
-                        <CheckCircle2 className="w-3 h-3" /> Đã kiểm duyệt chính thức
-                      </span>
-                    ) : (
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500 text-slate-950 flex items-center gap-1 shadow-xs">
-                        <Clock className="w-3 h-3" /> Chờ Ban Quản Trị duyệt
-                      </span>
-                    )}
-                  </div>
-                  <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-xs text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg">
-                    {story.festivalName}
-                  </div>
-                </div>
-              )}
-
-              <div className="p-6 space-y-3">
-                <div className="flex items-center justify-between text-xs text-slate-500">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-slate-800">{story.authorName}</span>
-                    <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-semibold">
-                      {story.authorRole}
-                    </span>
-                  </div>
-                  <span>{new Date(story.submittedAt).toLocaleDateString('vi-VN')}</span>
-                </div>
-
-                <h2 className="text-lg font-black text-slate-900 font-sans leading-snug">
-                  {story.title}
-                </h2>
-
-                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed line-clamp-4">
-                  {story.content}
-                </p>
-
-                {story.sourceReference && (
-                  <div className="text-[11px] text-slate-500 italic bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                    Nguồn tư liệu tham khảo: <strong>{story.sourceReference}</strong>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="px-6 py-4 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-xs">
-              <div className="flex flex-wrap gap-1">
-                {story.tags.map((t) => (
-                  <span key={t} className="text-[10px] text-slate-500 flex items-center gap-0.5">
-                    <Tag className="w-2.5 h-2.5" /> {t}
-                  </span>
-                ))}
-              </div>
-
-              <button
-                onClick={() => handleLike(story.id)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-rose-600 hover:border-rose-300 font-bold text-xs transition cursor-pointer"
-              >
-                <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
-                <span>{story.likes} Yêu thích</span>
-              </button>
-            </div>
-          </article>
-        ))}
+            {lang === 'vi' ? 'Đang chờ duyệt' : 'Pending Moderation'}
+          </button>
+        )}
       </div>
 
-      {/* Crowdsourcing Submission Modal */}
+      {/* Submit Story Modal with draft persistence */}
       {isSubmitOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col">
-            <div className="bg-gradient-to-r from-blue-700 to-indigo-700 p-6 text-white relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-amber-200 max-h-[90vh] overflow-y-auto space-y-4">
+            <div className="flex items-center justify-between border-b border-stone-200 pb-3">
+              <div className="flex items-center gap-2">
+                <PenTool className="w-5 h-5 text-red-700" />
+                <h2 className="text-lg font-black text-stone-900 font-serif">
+                  {t.community.contributeBtn}
+                </h2>
+                <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded font-mono font-bold">
+                  {lang === 'vi' ? 'Bản nháp tự lưu' : 'Auto-saved Draft'}
+                </span>
+              </div>
               <button
                 onClick={() => setIsSubmitOpen(false)}
-                className="absolute top-4 right-4 p-2 text-blue-100 hover:text-white hover:bg-white/10 rounded-full"
+                className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-100"
               >
                 <X className="w-5 h-5" />
               </button>
-              <div className="flex items-center gap-2 mb-1">
-                <Sparkles className="w-4 h-4 text-amber-300" />
-                <span className="text-xs font-bold uppercase tracking-wider text-blue-200">
-                  Cơ chế đóng góp cộng đồng (Crowdsourcing)
-                </span>
-              </div>
-              <h2 className="text-2xl font-bold font-sans">
-                Đóng Góp Tư Liệu Lịch Sử & Check-in Lễ Hội
-              </h2>
-              <p className="text-xs text-blue-100 mt-1">
-                Bài viết sẽ được Ban Quản Trị đối chiếu với tài liệu chính thống và phê duyệt công khai
-              </p>
             </div>
 
             {submitSuccess ? (
-              <div className="p-8 text-center space-y-3">
-                <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
-                  <CheckCircle2 className="w-8 h-8" />
-                </div>
-                <h3 className="text-lg font-bold text-slate-900">
-                  Đã gửi bài đóng góp thành công!
-                </h3>
-                <p className="text-xs text-slate-600 max-w-md mx-auto">
-                  Cảm ơn bạn đã chung tay bảo tồn di sản văn hóa 54 dân tộc. Bài viết của bạn đã được đưa vào hàng đợi kiểm duyệt CMS.
+              <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-2xl text-center space-y-2">
+                <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
+                <h4 className="font-extrabold text-emerald-950 text-base">
+                  {lang === 'vi' ? 'Đã gửi câu chuyện thành công!' : 'Story submitted successfully!'}
+                </h4>
+                <p className="text-xs text-emerald-800">
+                  {lang === 'vi'
+                    ? 'Bài viết của bạn đã được lưu và đưa vào hàng chờ kiểm duyệt CMS trước khi hiển thị công khai.'
+                    : 'Your story has been saved and queued for CMS editorial review before public display.'}
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleSubmitStory} className="p-6 overflow-y-auto space-y-4">
+              <form onSubmit={handleSubmitStory} className="space-y-4 text-xs">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                    Tiêu đề bài viết / câu chuyện
+                  <label className="block text-stone-700 font-bold mb-1">
+                    {lang === 'vi' ? 'Tiêu đề câu chuyện / Trải nghiệm *' : 'Story Title *'}
                   </label>
                   <input
                     type="text"
                     required
+                    placeholder={lang === 'vi' ? 'VD: Trải nghiệm lễ rước kiệu đền Hùng rực rỡ sắc màu' : 'e.g., Majestic procession at Hung King Temple'}
                     value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Ví dụ: Lễ rước kiệu làng tôi và tục hát then đêm rằm..."
-                    className="w-full text-sm px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-600"
+                    onChange={(e) => handleDraftChange('title', e.target.value)}
+                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-red-600"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                      Họ và tên người đóng góp
+                    <label className="block text-stone-700 font-bold mb-1">
+                      {lang === 'vi' ? 'Tác giả chia sẻ' : 'Author Name'}
                     </label>
                     <input
                       type="text"
                       required
                       value={authorName}
-                      onChange={(e) => setAuthorName(e.target.value)}
-                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200"
+                      onChange={(e) => handleDraftChange('authorName', e.target.value)}
+                      className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-red-600"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                      Tư cách người đóng góp
+                    <label className="block text-stone-700 font-bold mb-1">
+                      {lang === 'vi' ? 'Vai trò / Góc nhìn' : 'Role / Perspective'}
                     </label>
                     <select
                       value={authorRole}
-                      onChange={(e) => setAuthorRole(e.target.value)}
-                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 font-semibold"
+                      onChange={(e) => handleDraftChange('authorRole', e.target.value)}
+                      className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 font-semibold focus:outline-none focus:border-red-600"
                     >
-                      <option value="Du khách trẩy hội">Du khách trẩy hội</option>
-                      <option value="Nhà nghiên cứu văn hóa dân gian">Nhà nghiên cứu văn hóa dân gian</option>
-                      <option value="Người dân địa phương">Người dân địa phương</option>
-                      <option value="Ban quản lý di tích">Ban quản lý di tích</option>
+                      <option value="Du khách trẩy hội">{lang === 'vi' ? 'Du khách trẩy hội' : 'Visitor'}</option>
+                      <option value="Người dân bản địa">{lang === 'vi' ? 'Người dân bản địa' : 'Local Resident'}</option>
+                      <option value="Nhà nghiên cứu văn hóa">{lang === 'vi' ? 'Nhà nghiên cứu văn hóa' : 'Cultural Researcher'}</option>
+                      <option value="Nhiếp ảnh gia điền dã">{lang === 'vi' ? 'Nhiếp ảnh gia điền dã' : 'Field Photographer'}</option>
                     </select>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                      Lễ hội liên quan
+                    <label className="block text-stone-700 font-bold mb-1">
+                      {lang === 'vi' ? 'Lễ hội liên quan' : 'Associated Festival'}
                     </label>
                     <select
                       value={selectedFestivalId}
-                      onChange={(e) => {
-                        setSelectedFestivalId(e.target.value);
-                        const found = festivals.find((f) => f.id === e.target.value);
-                        if (found) setProvince(found.province);
-                      }}
-                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 font-semibold"
+                      onChange={(e) => handleDraftChange('festivalId', e.target.value)}
+                      className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 font-medium focus:outline-none focus:border-red-600"
                     >
                       {festivals.map((f) => (
                         <option key={f.id} value={f.id}>
-                          {f.name}
+                          {lang === 'en' && f.en?.name ? f.en.name : f.name}
                         </option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                      Tỉnh thành
+                    <label className="block text-stone-700 font-bold mb-1">
+                      {lang === 'vi' ? 'Tỉnh / Thành' : 'Province'}
                     </label>
                     <input
                       type="text"
                       value={province}
-                      onChange={(e) => setProvince(e.target.value)}
-                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200"
+                      onChange={(e) => handleDraftChange('province', e.target.value)}
+                      className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 font-medium focus:outline-none focus:border-red-600"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                      Dân tộc
+                    <label className="block text-stone-700 font-bold mb-1">
+                      {lang === 'vi' ? 'Dân tộc' : 'Ethnic Group'}
                     </label>
                     <input
                       type="text"
                       value={ethnicGroup}
-                      onChange={(e) => setEthnicGroup(e.target.value)}
-                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200"
+                      onChange={(e) => handleDraftChange('ethnicGroup', e.target.value)}
+                      className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 font-medium focus:outline-none focus:border-red-600"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                    Nội dung chia sẻ / Tư liệu lịch sử
+                  <label className="block text-stone-700 font-bold mb-1">
+                    {lang === 'vi' ? 'Nội dung chia sẻ & Cảm xúc trẩy hội *' : 'Story Content *'}
                   </label>
                   <textarea
-                    rows={4}
                     required
+                    rows={4}
+                    placeholder={lang === 'vi' ? 'Mô tả không khí, nghi lễ tâm đắc, món ăn truyền thống, điều cần chú ý khi tới tham quan...' : 'Describe the atmosphere, rituals, traditional food, or tips for visitors...'}
                     value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder="Mô tả chi tiết nghi thức, trải nghiệm không gian lễ hội, giai thoại lịch sử..."
-                    className="w-full text-sm p-3 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-600"
+                    onChange={(e) => handleDraftChange('content', e.target.value)}
+                    className="w-full bg-stone-50 border border-stone-200 rounded-xl p-3 font-medium focus:outline-none focus:border-red-600 leading-relaxed"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                    Nguồn tư liệu căn cứ / Sách tham khảo
+                  <label className="block text-stone-700 font-bold mb-1">
+                    {lang === 'vi' ? 'Nguồn gốc tư liệu / Căn cứ điền dã' : 'Source / Fieldwork References'}
                   </label>
                   <input
                     type="text"
+                    placeholder={lang === 'vi' ? 'VD: Ghi chép điền dã cá nhân tại bản làng, phỏng vấn nghệ nhân...' : 'e.g., Personal fieldwork notes, artisan interview...'}
                     value={sourceReference}
-                    onChange={(e) => setSourceReference(e.target.value)}
-                    placeholder="Ví dụ: Địa chí địa phương, lời kể các cụ cao niên, sách Lịch sử Đảng bộ..."
-                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200"
+                    onChange={(e) => handleDraftChange('sourceReference', e.target.value)}
+                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-red-600"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                    Đường dẫn hình ảnh minh họa (URL)
+                  <label className="block text-stone-700 font-bold mb-1">
+                    {lang === 'vi' ? 'Link ảnh minh họa (tùy chọn)' : 'Illustration Image URL (Optional)'}
                   </label>
                   <input
                     type="url"
+                    placeholder="https://..."
                     value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    placeholder="https://images.unsplash.com/photo-..."
-                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200"
+                    onChange={(e) => handleDraftChange('imageUrl', e.target.value)}
+                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-red-600"
                   />
                 </div>
 
-                <div className="pt-2 flex justify-end gap-2">
+                <div className="flex justify-end gap-2 pt-2 border-t border-stone-100">
                   <button
                     type="button"
                     onClick={() => setIsSubmitOpen(false)}
-                    className="px-4 py-2 border border-slate-200 text-slate-600 text-xs font-semibold rounded-xl"
+                    className="px-4 py-2 border border-stone-200 text-stone-600 font-bold rounded-xl"
                   >
-                    Hủy bỏ
+                    {lang === 'vi' ? 'Hủy bỏ' : 'Cancel'}
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5"
+                    className="px-5 py-2 bg-red-700 hover:bg-red-800 text-white font-bold rounded-xl shadow-xs"
                   >
-                    <Send className="w-3.5 h-3.5" /> Gửi kiểm duyệt
+                    {lang === 'vi' ? 'Gửi duyệt bài viết' : 'Submit for Review'}
                   </button>
                 </div>
               </form>
@@ -412,13 +386,86 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({ fest
         </div>
       )}
 
+      {/* Stories Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {displayedStories.map((story) => (
+          <div
+            key={story.id}
+            className="bg-white rounded-3xl overflow-hidden border border-amber-200/80 shadow-2xs hover:shadow-md transition flex flex-col justify-between"
+          >
+            <div>
+              {story.images && story.images.length > 0 && (
+                <div className="h-44 relative bg-stone-900">
+                  <img
+                    src={story.images[0]}
+                    alt={story.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-3 left-3 bg-red-700 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-xs">
+                    {story.festivalName}
+                  </div>
+                  {story.status === 'pending' && (
+                    <div className="absolute top-3 right-3 bg-amber-500 text-stone-950 text-[10px] font-bold px-2 py-0.5 rounded">
+                      {lang === 'vi' ? 'Chờ kiểm duyệt' : 'Pending review'}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="p-5 space-y-3">
+                <div className="flex items-center justify-between text-xs text-stone-500">
+                  <span>{story.province} • Dân tộc {story.ethnicGroup}</span>
+                  <span>{story.submittedAt}</span>
+                </div>
+
+                <h3 className="font-extrabold text-base text-stone-900 font-serif leading-snug">
+                  {story.title}
+                </h3>
+
+                <p className="text-xs text-stone-600 leading-relaxed line-clamp-3">
+                  {story.content}
+                </p>
+
+                <div className="text-[11px] text-stone-400 italic">
+                  {lang === 'vi' ? 'Nguồn: ' : 'Source: '} {story.sourceReference}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-5 pt-3 border-t border-stone-100 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-red-100 text-red-800 flex items-center justify-center font-bold text-[10px]">
+                  {story.authorName.charAt(0)}
+                </div>
+                <div>
+                  <span className="font-bold text-stone-800 block text-[11px]">
+                    {story.authorName}
+                  </span>
+                  <span className="text-[9px] text-stone-400">{story.authorRole}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => handleLike(story.id)}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition font-bold"
+              >
+                <Heart className="w-3.5 h-3.5 fill-current" />
+                <span>{story.likes}</span>
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Mandatory Disclaimer */}
-      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-amber-950 text-xs leading-relaxed flex items-start gap-2.5">
-        <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-        <p>
-          <strong>Lưu ý: </strong>
-          {LEGAL_DISCLAIMER}
-        </p>
+      <div className="bg-amber-50/90 border-2 border-amber-300 rounded-3xl p-5 text-amber-950 text-xs sm:text-sm leading-relaxed flex items-start gap-3">
+        <Info className="w-6 h-6 text-amber-700 shrink-0 mt-0.5" />
+        <div>
+          <h2 className="font-extrabold text-sm text-amber-900 uppercase tracking-wider mb-1">
+            {lang === 'vi' ? 'Khuyến cáo pháp lý bắt buộc:' : 'Mandatory Legal Notice:'}
+          </h2>
+          <p>{LEGAL_DISCLAIMER}</p>
+        </div>
       </div>
     </div>
   );

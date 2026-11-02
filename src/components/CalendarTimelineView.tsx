@@ -14,11 +14,13 @@ import {
   Info,
   ArrowRightLeft,
 } from 'lucide-react';
-import { FestivalEvent, Region, EventCategory } from '../types/festival';
+import { FestivalEvent, Region, EventCategory, AppLanguage } from '../types/festival';
 import { solarToLunar, lunarToSolar } from '../utils/lunarCalendar';
 import { calculateAllEventsForYear } from '../utils/festivalCalculator';
 import { exportToICS, exportToCSV } from '../utils/dataExporter';
 import { LEGAL_DISCLAIMER } from '../data/legalReferences';
+import { getSavedConverterDraft, saveConverterDraft } from '../utils/storage';
+import { getTranslation } from '../utils/i18n';
 
 interface CalendarTimelineViewProps {
   events: FestivalEvent[];
@@ -26,6 +28,7 @@ interface CalendarTimelineViewProps {
   setTargetYear: (year: number) => void;
   onSelectEvent: (event: FestivalEvent) => void;
   initialCategoryFilter?: EventCategory;
+  lang?: AppLanguage;
 }
 
 export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
@@ -34,7 +37,9 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
   setTargetYear,
   onSelectEvent,
   initialCategoryFilter,
+  lang = 'vi',
 }) => {
+  const t = getTranslation(lang);
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1); // 1-12
   const [viewMode, setViewMode] = useState<'grid' | 'timeline'>('grid');
   const [selectedRegion, setSelectedRegion] = useState<Region | 'All'>('All');
@@ -43,23 +48,46 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
   );
   const [selectedProvince, setSelectedProvince] = useState<string>('All');
 
-  // Interactive conversion tool state
+  // Interactive conversion tool state initialized with persistent draft!
   const [converterOpen, setConverterOpen] = useState(false);
-  const [convType, setConvType] = useState<'lunarToSolar' | 'solarToLunar'>('lunarToSolar');
-  const [convLunarDay, setConvLunarDay] = useState(10);
-  const [convLunarMonth, setConvLunarMonth] = useState(3);
-  const [convLunarYear, setConvLunarYear] = useState(targetYear);
-  const [convSolarDay, setConvSolarDay] = useState(18);
-  const [convSolarMonth, setConvSolarMonth] = useState(10);
-  const [convSolarYear, setConvSolarYear] = useState(targetYear);
+  const savedConv = getSavedConverterDraft();
+  const [convType, setConvType] = useState<'lunarToSolar' | 'solarToLunar'>(savedConv.convType);
+  const [convLunarDay, setConvLunarDay] = useState(savedConv.lunarDay);
+  const [convLunarMonth, setConvLunarMonth] = useState(savedConv.lunarMonth);
+  const [convLunarYear, setConvLunarYear] = useState(savedConv.lunarYear || targetYear);
+  const [convSolarDay, setConvSolarDay] = useState(savedConv.solarDay);
+  const [convSolarMonth, setConvSolarMonth] = useState(savedConv.solarMonth);
+  const [convSolarYear, setConvSolarYear] = useState(savedConv.solarYear || targetYear);
+
+  // Sync draft whenever user edits converter values
+  const updateConverter = (partial: Partial<typeof savedConv>) => {
+    const updated = {
+      convType,
+      lunarDay: convLunarDay,
+      lunarMonth: convLunarMonth,
+      lunarYear: convLunarYear,
+      solarDay: convSolarDay,
+      solarMonth: convSolarMonth,
+      solarYear: convSolarYear,
+      ...partial,
+    };
+    if (partial.convType !== undefined) setConvType(partial.convType);
+    if (partial.lunarDay !== undefined) setConvLunarDay(partial.lunarDay);
+    if (partial.lunarMonth !== undefined) setConvLunarMonth(partial.lunarMonth);
+    if (partial.lunarYear !== undefined) setConvLunarYear(partial.lunarYear);
+    if (partial.solarDay !== undefined) setConvSolarDay(partial.solarDay);
+    if (partial.solarMonth !== undefined) setConvSolarMonth(partial.solarMonth);
+    if (partial.solarYear !== undefined) setConvSolarYear(partial.solarYear);
+    saveConverterDraft(updated);
+  };
 
   // Provinces list from current events
   const provinces = Array.from(new Set(events.map((e) => e.province))).sort();
 
-  // Tính toán tất cả sự kiện trong targetYear
+  // All calculated events in targetYear
   const allCalculated = calculateAllEventsForYear(events, targetYear);
 
-  // Lọc theo bộ lọc
+  // Filtered by criteria
   const filteredEvents = allCalculated.filter((item) => {
     if (selectedRegion !== 'All' && item.event.region !== selectedRegion) return false;
     if (selectedCategory !== 'All' && item.event.category !== selectedCategory) return false;
@@ -67,18 +95,38 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
     return true;
   });
 
-  // Số ngày trong tháng đã chọn
+  // Days in month
   const daysInMonth = new Date(targetYear, selectedMonth, 0).getDate();
   const firstDayOfWeek = new Date(targetYear, selectedMonth - 1, 1).getDay(); // 0: CN, 1: T2 ...
 
-  // Chuyển đổi công cụ tức thời
+  // Instant calculation for conversion tool
   let convertedResultText = '';
   if (convType === 'lunarToSolar') {
     const res = lunarToSolar(convLunarDay, convLunarMonth, convLunarYear);
-    convertedResultText = `Ngày ${convLunarDay}/${convLunarMonth} Âm lịch năm ${convLunarYear} = Dương lịch: Thứ ..., ngày ${res.day}/${res.month}/${res.year}`;
+    if (res.year > 0) {
+      const targetDate = new Date(res.year, res.month - 1, res.day);
+      const weekdayStr =
+        lang === 'vi'
+          ? (targetDate.getDay() === 0 ? 'Chủ Nhật' : `Thứ ${targetDate.getDay() + 1}`)
+          : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][targetDate.getDay()];
+      convertedResultText =
+        lang === 'vi'
+          ? `Ngày ${convLunarDay}/${convLunarMonth} Âm lịch năm ${convLunarYear} = Dương lịch: ${weekdayStr}, ngày ${res.day}/${res.month}/${res.year}`
+          : `Lunar date ${convLunarDay}/${convLunarMonth}/${convLunarYear} = Solar: ${weekdayStr}, ${res.day}/${res.month}/${res.year}`;
+    } else {
+      convertedResultText = lang === 'vi' ? 'Ngày âm lịch không hợp lệ' : 'Invalid lunar date';
+    }
   } else {
     const res = solarToLunar(convSolarDay, convSolarMonth, convSolarYear);
-    convertedResultText = `Ngày ${convSolarDay}/${convSolarMonth}/${convSolarYear} Dương lịch = Âm lịch: Ngày ${res.day} tháng ${res.month} năm ${res.canChiYear} (${res.solarTerm})`;
+    const targetDate = new Date(convSolarYear, convSolarMonth - 1, convSolarDay);
+    const weekdayStr =
+      lang === 'vi'
+        ? (targetDate.getDay() === 0 ? 'Chủ Nhật' : `Thứ ${targetDate.getDay() + 1}`)
+        : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][targetDate.getDay()];
+    convertedResultText =
+      lang === 'vi'
+        ? `${weekdayStr}, ngày ${convSolarDay}/${convSolarMonth}/${convSolarYear} Dương lịch = Âm lịch: Ngày ${res.day} tháng ${res.month} (${res.canChiDay}) năm ${res.canChiYear} • Tiết: ${res.solarTerm}`
+        : `${weekdayStr}, ${convSolarDay}/${convSolarMonth}/${convSolarYear} Solar = Lunar: Day ${res.day} Month ${res.month} (${res.canChiDay}) Year ${res.canChiYear} • Solar Term: ${res.solarTerm}`;
   }
 
   const handlePrevMonth = () => {
@@ -99,373 +147,366 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
     }
   };
 
+  const monthNames =
+    lang === 'vi'
+      ? ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12']
+      : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+  const weekDayHeaders =
+    lang === 'vi'
+      ? ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7']
+      : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
   return (
     <div className="space-y-6 pb-12">
       {/* Header & Controls */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-5">
+      <div className="bg-white p-6 rounded-3xl border border-amber-200/90 shadow-xs space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="p-2 rounded-xl bg-blue-50 text-blue-600">
+              <span className="p-2 rounded-xl bg-red-50 text-red-700">
                 <CalendarIcon className="w-5 h-5" />
               </span>
-              <h1 className="text-2xl font-black text-slate-900 font-sans">
-                Lịch Lễ Hội & Sự Kiện Theo Dòng Thời Gian
+              <h1 className="text-2xl font-black text-stone-900 font-serif">
+                {t.calendar.title}
               </h1>
             </div>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Hệ thống tự động quy đổi Âm lịch sang Dương lịch chính xác cho từng năm
+            <p className="text-xs sm:text-sm text-stone-500 mt-1">
+              {t.calendar.subtitle}
             </p>
           </div>
 
           {/* Year selector & Quick Exporters */}
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center bg-slate-100 p-1 rounded-xl">
+            <div className="flex items-center bg-stone-100 p-1 rounded-xl">
               <button
                 onClick={() => setTargetYear(targetYear - 1)}
-                className="p-1.5 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-white"
+                className="p-1.5 text-stone-600 hover:text-stone-900 rounded-lg hover:bg-white"
                 title="Năm trước"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <span className="px-3 text-sm font-extrabold text-blue-900">
-                Năm {targetYear}
+              <span className="px-3 text-sm font-extrabold text-red-950 font-mono">
+                {lang === 'vi' ? `Năm ${targetYear}` : `Year ${targetYear}`}
               </span>
               <button
                 onClick={() => setTargetYear(targetYear + 1)}
-                className="p-1.5 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-white"
-                title="Năm kế tiếp"
+                className="p-1.5 text-stone-600 hover:text-stone-900 rounded-lg hover:bg-white"
+                title="Năm sau"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Quick Export Data Buttons */}
-            <button
-              onClick={() => exportToICS(filteredEvents)}
-              className="flex items-center gap-1.5 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs rounded-xl transition"
-              title="Xuất file iCal (.ics) để thêm vào Google Calendar hoặc điện thoại"
-            >
-              <Download className="w-3.5 h-3.5" /> Xuất iCal
-            </button>
-            <button
-              onClick={() => exportToCSV(filteredEvents)}
-              className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition"
-              title="Xuất bảng Excel/CSV để nghiên cứu và trích xuất dữ liệu"
-            >
-              <Download className="w-3.5 h-3.5" /> Xuất CSV
-            </button>
-
-            {/* Open Lunar-Solar Converter Tool */}
+            {/* Open Converter Button */}
             <button
               onClick={() => setConverterOpen(!converterOpen)}
-              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl border transition ${
-                converterOpen
-                  ? 'bg-amber-500 text-white border-amber-500'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-              }`}
+              className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl bg-amber-100 text-amber-950 border border-amber-300 hover:bg-amber-200 transition"
             >
-              <ArrowRightLeft className="w-3.5 h-3.5" /> Công cụ Quy đổi Âm - Dương
+              <ArrowRightLeft className="w-3.5 h-3.5 text-amber-800" />
+              <span>{t.converter.tabTitle}</span>
+            </button>
+
+            {/* Export ICS */}
+            <button
+              onClick={() => exportToICS(filteredEvents)}
+              className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl bg-red-700 text-white hover:bg-red-800 transition shadow-xs"
+              title="Xuất file iCalendar .ics"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>{t.calendar.exportICS}</span>
             </button>
           </div>
         </div>
 
-        {/* Interactive Converter Drawer / Panel */}
+        {/* Converter Tool Card (Collapsible, Persisted) */}
         {converterOpen && (
-          <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-5 rounded-2xl border border-amber-200 text-xs text-slate-800 space-y-4 animate-in fade-in">
-            <div className="flex items-center justify-between">
-              <span className="font-extrabold text-sm text-amber-950 flex items-center gap-2">
+          <div className="p-5 rounded-2xl bg-amber-50/70 border-2 border-amber-300 space-y-4">
+            <div className="flex items-center justify-between border-b border-amber-200 pb-2">
+              <div className="flex items-center gap-2 text-red-900 font-bold text-sm">
                 <Sparkles className="w-4 h-4 text-amber-600" />
-                Mô hình quy đổi Lịch Âm - Dương & Tính toán sự kiện định kỳ (Hồ Ngọc Đức)
-              </span>
-              <div className="flex gap-1 bg-white p-1 rounded-lg border border-amber-200">
+                <span>{t.converter.boxTitle}</span>
+                <span className="text-[10px] bg-emerald-600 text-white px-1.5 py-0.5 rounded font-mono">
+                  {lang === 'vi' ? 'Dữ liệu được tự động lưu' : 'Auto-saved'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setConvType('lunarToSolar')}
-                  className={`px-2.5 py-1 rounded-md font-bold text-xs ${
-                    convType === 'lunarToSolar' ? 'bg-amber-500 text-white' : 'text-slate-600'
+                  onClick={() => updateConverter({ convType: 'lunarToSolar' })}
+                  className={`text-xs px-2.5 py-1 rounded-lg font-bold transition ${
+                    convType === 'lunarToSolar'
+                      ? 'bg-red-700 text-white shadow-xs'
+                      : 'bg-white text-stone-700 hover:bg-amber-100'
                   }`}
                 >
-                  Âm sang Dương
+                  {t.converter.lunarToSolar}
                 </button>
                 <button
-                  onClick={() => setConvType('solarToLunar')}
-                  className={`px-2.5 py-1 rounded-md font-bold text-xs ${
-                    convType === 'solarToLunar' ? 'bg-amber-500 text-white' : 'text-slate-600'
+                  onClick={() => updateConverter({ convType: 'solarToLunar' })}
+                  className={`text-xs px-2.5 py-1 rounded-lg font-bold transition ${
+                    convType === 'solarToLunar'
+                      ? 'bg-red-700 text-white shadow-xs'
+                      : 'bg-white text-stone-700 hover:bg-amber-100'
                   }`}
                 >
-                  Dương sang Âm
+                  {t.converter.solarToLunar}
                 </button>
               </div>
             </div>
 
+            {/* Converter Inputs */}
             {convType === 'lunarToSolar' ? (
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-1">
-                  <span>Ngày Âm:</span>
+              <div className="grid grid-cols-3 gap-3 text-xs">
+                <div>
+                  <label className="block text-stone-600 font-bold mb-1">{t.converter.dayLunar}</label>
                   <input
                     type="number"
                     min={1}
                     max={30}
                     value={convLunarDay}
-                    onChange={(e) => setConvLunarDay(Number(e.target.value))}
-                    className="w-16 bg-white px-2 py-1.5 border border-amber-300 rounded-lg text-center font-bold"
+                    onChange={(e) => updateConverter({ lunarDay: Number(e.target.value) })}
+                    className="w-full bg-white px-3 py-2 border border-amber-300 rounded-xl font-bold"
                   />
                 </div>
-                <div className="flex items-center gap-1">
-                  <span>Tháng Âm:</span>
+                <div>
+                  <label className="block text-stone-600 font-bold mb-1">{t.converter.monthLunar}</label>
                   <input
                     type="number"
                     min={1}
                     max={12}
                     value={convLunarMonth}
-                    onChange={(e) => setConvLunarMonth(Number(e.target.value))}
-                    className="w-16 bg-white px-2 py-1.5 border border-amber-300 rounded-lg text-center font-bold"
+                    onChange={(e) => updateConverter({ lunarMonth: Number(e.target.value) })}
+                    className="w-full bg-white px-3 py-2 border border-amber-300 rounded-xl font-bold"
                   />
                 </div>
-                <div className="flex items-center gap-1">
-                  <span>Năm Dương lịch cần xem:</span>
+                <div>
+                  <label className="block text-stone-600 font-bold mb-1">{t.converter.year}</label>
                   <input
                     type="number"
                     value={convLunarYear}
-                    onChange={(e) => setConvLunarYear(Number(e.target.value))}
-                    className="w-20 bg-white px-2 py-1.5 border border-amber-300 rounded-lg text-center font-bold"
+                    onChange={(e) => updateConverter({ lunarYear: Number(e.target.value) })}
+                    className="w-full bg-white px-3 py-2 border border-amber-300 rounded-xl font-bold font-mono"
                   />
                 </div>
               </div>
             ) : (
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-1">
-                  <span>Ngày Dương:</span>
+              <div className="grid grid-cols-3 gap-3 text-xs">
+                <div>
+                  <label className="block text-stone-600 font-bold mb-1">{t.converter.daySolar}</label>
                   <input
                     type="number"
                     min={1}
                     max={31}
                     value={convSolarDay}
-                    onChange={(e) => setConvSolarDay(Number(e.target.value))}
-                    className="w-16 bg-white px-2 py-1.5 border border-amber-300 rounded-lg text-center font-bold"
+                    onChange={(e) => updateConverter({ solarDay: Number(e.target.value) })}
+                    className="w-full bg-white px-3 py-2 border border-amber-300 rounded-xl font-bold"
                   />
                 </div>
-                <div className="flex items-center gap-1">
-                  <span>Tháng Dương:</span>
+                <div>
+                  <label className="block text-stone-600 font-bold mb-1">{t.converter.monthSolar}</label>
                   <input
                     type="number"
                     min={1}
                     max={12}
                     value={convSolarMonth}
-                    onChange={(e) => setConvSolarMonth(Number(e.target.value))}
-                    className="w-16 bg-white px-2 py-1.5 border border-amber-300 rounded-lg text-center font-bold"
+                    onChange={(e) => updateConverter({ solarMonth: Number(e.target.value) })}
+                    className="w-full bg-white px-3 py-2 border border-amber-300 rounded-xl font-bold"
                   />
                 </div>
-                <div className="flex items-center gap-1">
-                  <span>Năm Dương:</span>
+                <div>
+                  <label className="block text-stone-600 font-bold mb-1">{t.converter.year}</label>
                   <input
                     type="number"
                     value={convSolarYear}
-                    onChange={(e) => setConvSolarYear(Number(e.target.value))}
-                    className="w-20 bg-white px-2 py-1.5 border border-amber-300 rounded-lg text-center font-bold"
+                    onChange={(e) => updateConverter({ solarYear: Number(e.target.value) })}
+                    className="w-full bg-white px-3 py-2 border border-amber-300 rounded-xl font-bold font-mono"
                   />
                 </div>
               </div>
             )}
 
-            <div className="bg-white p-3 rounded-xl border border-amber-300 font-bold text-amber-900 text-xs sm:text-sm">
-              Kết quả: {convertedResultText}
+            {/* Result Box */}
+            <div className="p-3 bg-white rounded-xl border border-amber-300 text-xs text-stone-800 font-medium leading-relaxed">
+              <strong className="text-red-800 block text-xs uppercase mb-0.5">
+                {t.converter.resultLabel}:
+              </strong>
+              {convertedResultText}
             </div>
           </div>
         )}
 
-        {/* Filters Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-bold text-slate-500 flex items-center gap-1 mr-1">
-              <Filter className="w-3.5 h-3.5" /> Lọc:
-            </span>
-
+        {/* Filter Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-stone-100 pt-4">
+          <div className="flex flex-wrap items-center gap-2 text-xs">
             {/* Region Filter */}
             <select
               value={selectedRegion}
-              onChange={(e) => setSelectedRegion(e.target.value as any)}
-              className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-semibold text-slate-700 focus:outline-none focus:border-blue-500"
+              onChange={(e) => setSelectedRegion(e.target.value as Region | 'All')}
+              className="bg-stone-50 border border-stone-200 rounded-xl px-3 py-1.5 font-semibold text-stone-700 focus:outline-none"
             >
-              <option value="All">Toàn quốc (3 Miền)</option>
-              <option value="Bắc">Miền Bắc</option>
-              <option value="Trung">Miền Trung</option>
-              <option value="Tây Nguyên">Tây Nguyên</option>
-              <option value="Nam">Miền Nam</option>
+              <option value="All">{t.calendar.filterAllRegions}</option>
+              <option value="Bắc">{lang === 'vi' ? 'Miền Bắc' : 'Northern'}</option>
+              <option value="Trung">{lang === 'vi' ? 'Miền Trung' : 'Central'}</option>
+              <option value="Nam">{lang === 'vi' ? 'Miền Nam' : 'Southern'}</option>
+              <option value="Tây Nguyên">{lang === 'vi' ? 'Tây Nguyên' : 'Highlands'}</option>
+              <option value="Tây Nam Bộ">{lang === 'vi' ? 'Tây Nam Bộ' : 'Mekong Delta'}</option>
+            </select>
+
+            {/* Category Filter */}
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value as EventCategory | 'All')}
+              className="bg-stone-50 border border-stone-200 rounded-xl px-3 py-1.5 font-semibold text-stone-700 focus:outline-none"
+            >
+              <option value="All">{t.calendar.filterAllCategories}</option>
+              <option value="Lễ hội">{lang === 'vi' ? 'Lễ hội' : 'Festivals'}</option>
+              <option value="Sự kiện lịch sử">{lang === 'vi' ? 'Sự kiện lịch sử' : 'History'}</option>
+              <option value="Danh nhân">{lang === 'vi' ? 'Danh nhân' : 'Figures'}</option>
+              <option value="Phong tục">{lang === 'vi' ? 'Phong tục' : 'Customs'}</option>
             </select>
 
             {/* Province Filter */}
             <select
               value={selectedProvince}
               onChange={(e) => setSelectedProvince(e.target.value)}
-              className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-semibold text-slate-700 focus:outline-none focus:border-blue-500"
+              className="bg-stone-50 border border-stone-200 rounded-xl px-3 py-1.5 font-semibold text-stone-700 focus:outline-none max-w-[150px]"
             >
-              <option value="All">Tất cả tỉnh thành</option>
+              <option value="All">{t.calendar.filterAllProvinces}</option>
               {provinces.map((p) => (
                 <option key={p} value={p}>
                   {p}
                 </option>
               ))}
             </select>
-
-            {/* Category Filter */}
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value as any)}
-              className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-semibold text-slate-700 focus:outline-none focus:border-blue-500"
-            >
-              <option value="All">Tất cả chủ đề</option>
-              <option value="Lễ hội">Lễ hội truyền thống</option>
-              <option value="Sự kiện lịch sử">Sự kiện lịch sử</option>
-              <option value="Danh nhân">Danh nhân đất Việt</option>
-              <option value="Phong tục">Phong tục tập quán</option>
-            </select>
           </div>
 
-          {/* View Mode Toggle: Grid vs Timeline */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+          {/* Grid vs Timeline toggle */}
+          <div className="flex items-center bg-stone-100 p-1 rounded-xl">
             <button
               onClick={() => setViewMode('grid')}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                viewMode === 'grid' ? 'bg-white text-blue-700 shadow-2xs' : 'text-slate-500 hover:text-slate-800'
+              className={`flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-lg transition ${
+                viewMode === 'grid'
+                  ? 'bg-white text-red-950 shadow-xs'
+                  : 'text-stone-600 hover:text-stone-900'
               }`}
             >
-              <Grid className="w-3.5 h-3.5" /> Lịch Tháng
+              <Grid className="w-3.5 h-3.5" />
+              <span>{t.calendar.gridMonthly}</span>
             </button>
             <button
               onClick={() => setViewMode('timeline')}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                viewMode === 'timeline' ? 'bg-white text-blue-700 shadow-2xs' : 'text-slate-500 hover:text-slate-800'
+              className={`flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-lg transition ${
+                viewMode === 'timeline'
+                  ? 'bg-white text-red-950 shadow-xs'
+                  : 'text-stone-600 hover:text-stone-900'
               }`}
             >
-              <List className="w-3.5 h-3.5" /> Dòng Thời Gian
+              <List className="w-3.5 h-3.5" />
+              <span>{t.calendar.timelineFullYear}</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Main View: Month Grid or Timeline */}
+      {/* Month Carousel in Grid View */}
+      {viewMode === 'grid' && (
+        <div className="flex items-center justify-between bg-white px-6 py-3 rounded-2xl border border-amber-200/80 shadow-xs">
+          <button
+            onClick={handlePrevMonth}
+            className="p-2 text-stone-700 hover:text-red-700 rounded-xl hover:bg-stone-50 transition"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <div className="text-center">
+            <h2 className="text-lg font-black text-stone-900 font-serif">
+              {monthNames[selectedMonth - 1]} - {targetYear}
+            </h2>
+            <p className="text-[11px] text-stone-500">
+              {lang === 'vi' ? 'Quy đổi song song Âm - Dương' : 'Dual Lunar - Solar Synchronization'}
+            </p>
+          </div>
+          <button
+            onClick={handleNextMonth}
+            className="p-2 text-stone-700 hover:text-red-700 rounded-xl hover:bg-stone-50 transition"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+
+      {/* Grid Calendar Presentation */}
       {viewMode === 'grid' ? (
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
-          {/* Month Navigation Tabs */}
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <button
-              onClick={handlePrevMonth}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-blue-700 hover:bg-slate-50 rounded-xl"
-            >
-              <ChevronLeft className="w-4 h-4" /> Tháng trước
-            </button>
-
-            <div className="text-center">
-              <span className="text-lg font-black text-blue-950 font-sans">
-                Tháng {selectedMonth} / {targetYear}
+        <div className="bg-white rounded-3xl border border-amber-200/80 shadow-xs overflow-hidden">
+          {/* Day of week headers */}
+          <div className="grid grid-cols-7 border-b border-stone-200 bg-amber-50/50 text-center py-2.5 text-xs font-bold text-stone-700">
+            {weekDayHeaders.map((d, idx) => (
+              <span key={d} className={idx === 0 ? 'text-red-700' : ''}>
+                {d}
               </span>
-              <p className="text-[11px] text-slate-500">
-                (Click vào ngày có dấu chấm hoặc thẻ lễ hội để xem chi tiết nghi thức)
-              </p>
-            </div>
-
-            <button
-              onClick={handleNextMonth}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-blue-700 hover:bg-slate-50 rounded-xl"
-            >
-              Tháng sau <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Quick 12 Months Bar */}
-          <div className="flex overflow-x-auto gap-1 pb-1">
-            {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-              <button
-                key={m}
-                onClick={() => setSelectedMonth(m)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition ${
-                  selectedMonth === m
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                Tháng {m}
-              </button>
             ))}
           </div>
 
-          {/* Weekday headers */}
-          <div className="grid grid-cols-7 gap-1 text-center font-bold text-xs text-slate-400 uppercase py-2 border-y border-slate-100">
-            <span className="text-rose-500">CN</span>
-            <span>T2</span>
-            <span>T3</span>
-            <span>T4</span>
-            <span>T5</span>
-            <span>T6</span>
-            <span className="text-blue-600">T7</span>
-          </div>
-
-          {/* Month Grid Cells */}
-          <div className="grid grid-cols-7 gap-1 sm:gap-2">
-            {/* Empty offset days */}
+          {/* Calendar cell boxes */}
+          <div className="grid grid-cols-7 divide-x divide-y divide-stone-100 min-h-[460px]">
+            {/* Blank leading slots */}
             {Array.from({ length: firstDayOfWeek }).map((_, idx) => (
-              <div key={`empty-${idx}`} className="min-h-[90px] sm:min-h-[110px] bg-slate-50/40 rounded-xl" />
+              <div key={`blank-${idx}`} className="bg-stone-50/40 p-2 min-h-[90px]" />
             ))}
 
-            {/* Days of current month */}
+            {/* Days in Month */}
             {Array.from({ length: daysInMonth }).map((_, idx) => {
-              const dayNum = idx + 1;
-              const dateStr = `${targetYear}-${selectedMonth < 10 ? '0' : ''}${selectedMonth}-${
-                dayNum < 10 ? '0' : ''
-              }${dayNum}`;
-
-              // Tính âm lịch của ngày này
-              const lunar = solarToLunar(dayNum, selectedMonth, targetYear);
-
-              // Tìm sự kiện diễn ra ngày này
+              const day = idx + 1;
+              const lunarInfo = solarToLunar(day, selectedMonth, targetYear);
               const dayEvents = filteredEvents.filter((item) => {
-                return dateStr >= item.solarStartDate && dateStr <= item.solarEndDate;
+                const sParts = item.solarStartDate.split('/');
+                return Number(sParts[0]) === day && Number(sParts[1]) === selectedMonth;
               });
 
-              const isFirstOrFifteen = lunar.day === 1 || lunar.day === 15;
+              const isFirstOrFifteen = lunarInfo.day === 1 || lunarInfo.day === 15;
 
               return (
                 <div
-                  key={dayNum}
-                  className={`min-h-[90px] sm:min-h-[110px] p-1.5 sm:p-2 rounded-xl border transition flex flex-col justify-between ${
-                    dayEvents.length > 0
-                      ? 'bg-blue-50/40 border-blue-200 hover:border-blue-400 shadow-2xs'
-                      : 'bg-white border-slate-100 hover:border-slate-300'
-                  }`}
+                  key={`day-${day}`}
+                  className="p-2 min-h-[90px] hover:bg-amber-50/40 transition flex flex-col justify-between group"
                 >
                   <div className="flex items-start justify-between">
-                    <span
-                      className={`text-sm sm:text-base font-extrabold ${
-                        dayEvents.length > 0 ? 'text-blue-700' : 'text-slate-800'
-                      }`}
-                    >
-                      {dayNum}
+                    <span className="text-sm font-extrabold text-stone-900 group-hover:text-red-700">
+                      {day}
                     </span>
                     <span
-                      className={`text-[10px] font-semibold px-1 rounded-sm ${
+                      className={`text-[10px] font-bold px-1 rounded ${
                         isFirstOrFifteen
-                          ? 'bg-amber-100 text-amber-800 font-bold'
-                          : 'text-slate-600'
+                          ? 'bg-amber-500 text-stone-950 font-black'
+                          : 'text-stone-500'
                       }`}
-                      title={`Ngày ${lunar.day}/${lunar.month} Âm lịch (${lunar.canChiDay})`}
+                      title={`Âm lịch: Ngày ${lunarInfo.day}/${lunarInfo.month}`}
                     >
-                      {lunar.day}/{lunar.month}
+                      {lunarInfo.day === 1 ? `${lunarInfo.day}/${lunarInfo.month}` : lunarInfo.day}
                     </span>
                   </div>
 
-                  {/* Day Events Badges */}
-                  <div className="space-y-1 mt-1 flex-1 overflow-hidden">
-                    {dayEvents.map((ev) => (
-                      <div
-                        key={ev.event.id}
-                        onClick={() => onSelectEvent(ev.event)}
-                        className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 truncate cursor-pointer shadow-2xs"
-                        title={`${ev.event.name} (${ev.event.province}) - Bấm xem chi tiết`}
-                      >
-                        {ev.event.name}
-                      </div>
-                    ))}
+                  {/* Festivals on this day */}
+                  <div className="space-y-1 my-1">
+                    {dayEvents.map((evItem) => {
+                      const fName =
+                        lang === 'en' && evItem.event.en?.name
+                          ? evItem.event.en.name
+                          : evItem.event.name;
+                      return (
+                        <button
+                          key={evItem.event.id}
+                          onClick={() => onSelectEvent(evItem.event)}
+                          title={`${fName} (${evItem.lunarStartDateText})`}
+                          className="w-full text-left text-[10px] font-bold p-1 rounded bg-red-50 hover:bg-red-700 hover:text-white text-red-900 border border-red-200 transition truncate block"
+                        >
+                          {fName}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="text-[9px] text-stone-500 truncate">
+                    {lunarInfo.solarTerm || ''}
                   </div>
                 </div>
               );
@@ -473,78 +514,71 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
           </div>
         </div>
       ) : (
-        /* Timeline View */
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h2 className="text-lg font-black text-slate-900 font-sans">
-              Dòng Thời Gian Lễ Hội Toàn Bộ Năm {targetYear} ({filteredEvents.length} sự kiện)
-            </h2>
-            <span className="text-xs text-slate-500">
-              Sắp xếp tuần tự theo ngày Dương lịch tương ứng
-            </span>
-          </div>
-
-          <div className="relative border-l-2 border-blue-200 ml-4 pl-6 space-y-8">
-            {filteredEvents.map((item) => (
-              <div key={item.event.id} className="relative group">
-                {/* Timeline Dot */}
-                <span className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-blue-600 border-4 border-white shadow-xs group-hover:scale-125 transition" />
-
-                <div className="bg-slate-50 hover:bg-blue-50/40 border border-slate-200 hover:border-blue-200 p-5 rounded-2xl transition space-y-3">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-1 rounded-md text-xs font-extrabold bg-blue-600 text-white">
-                        {item.solarStartDate}
-                        {item.solarStartDate !== item.solarEndDate && ` → ${item.solarEndDate}`}
-                      </span>
-                      <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
-                        {item.lunarStartDateText}
-                      </span>
-                    </div>
-                    <span className="text-xs font-semibold text-slate-500">
-                      {item.event.region} • {item.event.province}
+        /* Timeline List Presentation */
+        <div className="space-y-3">
+          {filteredEvents.map((item) => {
+            const fName =
+              lang === 'en' && item.event.en?.name ? item.event.en.name : item.event.name;
+            const fOrigin =
+              lang === 'en' && item.event.en?.historicalOrigin
+                ? item.event.en.historicalOrigin
+                : item.event.historicalOrigin;
+            return (
+              <div
+                key={item.event.id}
+                onClick={() => onSelectEvent(item.event)}
+                className="bg-white p-5 rounded-2xl border border-amber-200/80 shadow-2xs hover:shadow-md hover:border-red-300 transition cursor-pointer flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-red-700 text-amber-100 flex flex-col items-center justify-center shrink-0">
+                    <span className="text-[10px] uppercase font-bold">
+                      {lang === 'vi' ? 'Dương lịch' : 'Solar'}
                     </span>
+                    <span className="text-sm font-black">{item.solarStartDate}</span>
                   </div>
-
-                  <div>
-                    <h3
-                      onClick={() => onSelectEvent(item.event)}
-                      className="text-lg font-black text-slate-900 hover:text-blue-600 transition cursor-pointer"
-                    >
-                      {item.event.name}
-                    </h3>
-                    <p className="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed">
-                      {item.event.historicalOrigin}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200/60 text-xs">
-                    <div className="flex items-center gap-1.5 text-slate-500">
-                      <FileText className="w-3.5 h-3.5 text-blue-600" />
-                      <span>Căn cứ pháp lý: <strong>{item.event.legalBasis.documentNumber}</strong></span>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-red-800">
+                      <span>{item.event.province}</span>
+                      <span>•</span>
+                      <span>
+                        {lang === 'vi' ? `Dân tộc ${item.event.ethnicGroup}` : `Ethnic ${item.event.ethnicGroup}`}
+                      </span>
+                      <span>•</span>
+                      <span className="text-amber-700 font-bold">
+                        {lang === 'vi' ? `Âm lịch: ${item.lunarStartDateText}` : `Lunar: ${item.lunarStartDateText}`}
+                      </span>
                     </div>
-
-                    <button
-                      onClick={() => onSelectEvent(item.event)}
-                      className="text-blue-600 font-bold hover:underline"
-                    >
-                      Xem nghi thức & đường đi &rarr;
-                    </button>
+                    <h3 className="text-base font-black text-stone-900 font-serif">{fName}</h3>
+                    <p className="text-xs text-stone-600 line-clamp-1">{fOrigin}</p>
                   </div>
                 </div>
+
+                <div className="flex items-center gap-2 self-end md:self-center">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectEvent(item.event);
+                    }}
+                    className="px-3.5 py-1.5 bg-red-700 hover:bg-red-800 text-white font-bold text-xs rounded-xl transition"
+                  >
+                    {lang === 'vi' ? 'Xem chi tiết' : 'Details'}
+                  </button>
+                </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
       )}
 
       {/* Mandatory Disclaimer */}
-      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-amber-950 text-xs leading-relaxed flex items-start gap-2.5">
-        <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-        <p>
-          <strong>Lưu ý: </strong>
-          {LEGAL_DISCLAIMER}
-        </p>
+      <div className="bg-amber-50/90 border-2 border-amber-300 rounded-3xl p-5 text-amber-950 text-xs sm:text-sm leading-relaxed flex items-start gap-3">
+        <Info className="w-6 h-6 text-amber-700 shrink-0 mt-0.5" />
+        <div>
+          <h2 className="font-extrabold text-sm text-amber-900 uppercase tracking-wider mb-1">
+            {lang === 'vi' ? 'Khuyến cáo pháp lý bắt buộc:' : 'Mandatory Legal Notice:'}
+          </h2>
+          <p>{LEGAL_DISCLAIMER}</p>
+        </div>
       </div>
     </div>
   );

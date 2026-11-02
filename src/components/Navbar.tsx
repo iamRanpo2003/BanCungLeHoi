@@ -12,8 +12,12 @@ import {
   FileText,
   Search,
   SlidersHorizontal,
+  Languages,
+  Eye,
 } from 'lucide-react';
-import { UserProfile } from '../types/festival';
+import { UserProfile, AppLanguage, AccessibilitySettings } from '../types/festival';
+import { DongSonLogo } from './DongSonLogo';
+import { getTranslation } from '../utils/i18n';
 
 interface NavbarProps {
   currentTab: string;
@@ -24,6 +28,11 @@ interface NavbarProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   bookmarkCount: number;
+  lang: AppLanguage;
+  onLanguageChange: (lang: AppLanguage) => void;
+  a11y: AccessibilitySettings;
+  onToggleA11yBar: () => void;
+  isA11yBarOpen: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -35,20 +44,26 @@ export const Navbar: React.FC<NavbarProps> = ({
   searchQuery,
   setSearchQuery,
   bookmarkCount,
+  lang,
+  onLanguageChange,
+  a11y,
+  onToggleA11yBar,
+  isA11yBarOpen,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const t = getTranslation(lang);
 
   const navItems = [
-    { id: 'home', label: 'Trang chủ', icon: Compass },
-    { id: 'calendar', label: 'Lịch Lễ Hội', icon: Calendar },
-    { id: 'map', label: 'Bản đồ Di sản', icon: MapPin },
-    { id: 'community', label: 'Cộng đồng', icon: Users },
-    { id: 'legal', label: 'Căn cứ Pháp lý', icon: FileText },
-    { id: 'about', label: 'Giới thiệu', icon: ShieldCheck },
+    { id: 'home', label: t.nav.home, icon: Compass },
+    { id: 'calendar', label: t.nav.calendar, icon: Calendar },
+    { id: 'map', label: t.nav.map, icon: MapPin },
+    { id: 'community', label: t.nav.community, icon: Users },
+    { id: 'legal', label: t.nav.legal, icon: FileText },
+    { id: 'about', label: t.nav.about, icon: ShieldCheck },
   ];
 
   if (user.role === 'admin') {
-    navItems.push({ id: 'admin', label: 'Quản trị CMS', icon: SlidersHorizontal });
+    navItems.push({ id: 'admin', label: t.nav.admin, icon: SlidersHorizontal });
   }
 
   const handleSelectTab = (id: string) => {
@@ -57,16 +72,26 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-blue-100 shadow-xs">
-      {/* Top Banner Disclaimer & Info */}
-      <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white text-xs py-1.5 px-4 font-medium">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-amber-200/80 shadow-xs">
+      {/* Top Heritage Ribbon / Info banner */}
+      <div className="heritage-gradient-bar text-amber-100 text-xs py-1.5 px-4 font-medium border-b border-amber-700/40">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Bancunglehoi.ai.studio - Nền tảng dữ liệu Lễ hội Truyền thống & Di sản 54 Dân tộc Việt Nam</span>
+            <span className="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            <span className="font-semibold tracking-wide">
+              {lang === 'vi'
+                ? 'Bancunglehoi.ai.studio - Nền tảng Dữ liệu & Bản đồ Lễ hội Di sản 54 Dân tộc Việt Nam'
+                : 'Bancunglehoi.ai.studio - Heritage Festival Platform & Interactive Map of 54 Ethnic Groups of Vietnam'}
+            </span>
           </div>
-          <div className="text-blue-200 hidden sm:block">
-            <span>Dữ liệu chuẩn hóa Bộ VHTTDL & Quy đổi Âm - Dương Lịch chuẩn GMT+7</span>
+          <div className="text-amber-200/90 hidden md:flex items-center gap-4 text-[11px]">
+            <span>
+              {lang === 'vi'
+                ? 'Chuẩn hóa Bộ VHTTDL & Quy đổi Âm - Dương Lịch Thiên văn GMT+7'
+                : 'Standardized by Ministry of Culture, Sports & Tourism • GMT+7 Astronomical Lunar Engine'}
+            </span>
+            <span className="text-amber-400 font-bold">•</span>
+            <span className="text-amber-300 font-medium">Song ngữ VI / EN</span>
           </div>
         </div>
       </div>
@@ -74,26 +99,26 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Main Header Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-3">
-          {/* Logo and Brand */}
+          {/* Logo and Brand with Dong Son emblem */}
           <div
-            className="flex items-center gap-3 cursor-pointer select-none"
+            className="flex items-center gap-3 cursor-pointer select-none group"
             onClick={() => handleSelectTab('home')}
             title="Về Trang chủ Bancunglehoi"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 to-blue-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-              <Calendar className="w-6 h-6 stroke-[2.2]" />
+            <div className="transform transition-transform group-hover:scale-105">
+              <DongSonLogo size={42} highContrast={a11y.highContrast} />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-xl tracking-tight text-blue-950 font-sans">
-                  Bancung<span className="text-blue-600">lehoi</span>
+                <span className="font-extrabold text-xl tracking-tight text-red-950 font-serif">
+                  Bancung<span className="text-red-700">lehoi</span>
                 </span>
-                <span className="text-[10px] font-bold bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
-                  VN
+                <span className="text-[10px] font-black bg-gradient-to-r from-amber-500 to-amber-600 text-red-950 px-2 py-0.5 rounded-full uppercase tracking-wider shadow-2xs">
+                  {lang === 'vi' ? 'Di sản VN' : 'Heritage'}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-700 hidden sm:block font-medium">
-                Lịch lễ hội truyền thống toàn quốc
+              <p className="text-[11px] text-amber-900/80 hidden sm:block font-medium">
+                {lang === 'vi' ? 'Lịch lễ hội truyền thống toàn quốc' : 'National Traditional Festivals Portal'}
               </p>
             </div>
           </div>
@@ -101,18 +126,19 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Quick Search Bar */}
           <div className="hidden md:flex flex-1 max-w-xs lg:max-w-md mx-2">
             <div className="relative w-full">
-              <Search className="w-4 h-4 text-slate-700 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-amber-700/80 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Tìm lễ hội, đền chùa, dân tộc, tỉnh thành..."
+                placeholder={t.nav.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-sm text-slate-800 placeholder-slate-400 pl-9 pr-4 py-2 rounded-xl border border-slate-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all"
+                className="w-full bg-amber-50/50 hover:bg-amber-50 focus:bg-white text-sm text-stone-900 placeholder-stone-500 pl-9 pr-8 py-2 rounded-xl border border-amber-200 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-100 transition-all"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-800 p-1"
+                  aria-label="Xóa từ khóa tìm kiếm"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-800 p-1"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -121,7 +147,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden xl:flex items-center gap-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentTab === item.id;
@@ -129,13 +155,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => handleSelectTab(item.id)}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all ${
                     isActive
-                      ? 'bg-blue-50 text-blue-700 shadow-2xs font-bold'
-                      : 'text-slate-600 hover:text-blue-700 hover:bg-slate-50'
+                      ? 'bg-red-50 text-red-800 shadow-2xs font-bold border border-red-200/80'
+                      : 'text-stone-700 hover:text-red-800 hover:bg-amber-50/70'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-red-700' : 'text-stone-400'}`} />
                   {item.label}
                 </button>
               );
@@ -143,16 +169,46 @@ export const Navbar: React.FC<NavbarProps> = ({
           </nav>
 
           {/* Right Action Bar */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Accessibility Drawer Toggle Button */}
+            <button
+              onClick={onToggleA11yBar}
+              title={
+                lang === 'vi'
+                  ? 'Chế độ Trợ năng: Chữ lớn, tương phản cao, đọc thành tiếng'
+                  : 'Accessibility Mode: Large text, high contrast, text-to-speech'
+              }
+              aria-label="Mở bảng điều khiển trợ năng"
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold transition border ${
+                isA11yBarOpen || a11y.highContrast || a11y.fontSize !== 'normal'
+                  ? 'bg-amber-600 text-white border-amber-700 shadow-xs'
+                  : 'bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100'
+              }`}
+            >
+              <Eye className="w-4 h-4 text-amber-600 group-hover:text-amber-800" />
+              <span className="hidden sm:inline">{t.nav.accessibility}</span>
+            </button>
+
+            {/* Language Switcher Button */}
+            <button
+              onClick={() => onLanguageChange(lang === 'vi' ? 'en' : 'vi')}
+              title={lang === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
+              aria-label="Chuyển đổi ngôn ngữ"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-stone-100 text-stone-800 border border-stone-200 hover:bg-amber-50 hover:border-amber-300 transition"
+            >
+              <Languages className="w-3.5 h-3.5 text-stone-600" />
+              <span className="font-extrabold uppercase">{lang === 'vi' ? 'VI' : 'EN'}</span>
+            </button>
+
             {/* Bookmarks Counter */}
             <button
               onClick={() => handleSelectTab('profile')}
-              title="Danh sách lễ hội đã lưu"
-              className="relative p-2 text-slate-600 hover:text-blue-700 hover:bg-blue-50 rounded-xl transition"
+              title={lang === 'vi' ? 'Danh sách lễ hội đã lưu' : 'Saved festivals bookmark'}
+              className="relative p-2 text-stone-700 hover:text-red-700 hover:bg-red-50 rounded-xl transition"
             >
               <Bookmark className="w-5 h-5" />
               {bookmarkCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+                <span className="absolute -top-0.5 -right-0.5 bg-red-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
                   {bookmarkCount}
                 </span>
               )}
@@ -161,34 +217,34 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Role switch toggle badge */}
             <button
               onClick={onToggleRole}
-              title={`Chế độ hiện tại: ${user.role === 'admin' ? 'Quản trị viên' : 'Người dùng'}. Bấm để chuyển đổi.`}
-              className={`hidden sm:flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition ${
+              title={`Chế độ: ${user.role === 'admin' ? 'CMS Quản trị' : 'Người dùng'}. Bấm để đổi.`}
+              className={`hidden md:flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border transition ${
                 user.role === 'admin'
-                  ? 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100'
-                  : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                  ? 'bg-amber-100 text-amber-950 border-amber-400 hover:bg-amber-200'
+                  : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
               }`}
             >
               <span
                 className={`w-2 h-2 rounded-full ${
-                  user.role === 'admin' ? 'bg-amber-500' : 'bg-emerald-500'
+                  user.role === 'admin' ? 'bg-amber-600' : 'bg-emerald-500'
                 }`}
               />
-              <span>{user.role === 'admin' ? 'CMS Quản trị' : 'Người dùng'}</span>
+              <span className="hidden lg:inline">{user.role === 'admin' ? 'CMS Quản trị' : 'Người dùng'}</span>
             </button>
 
             {/* User Profile / Auth Button */}
             <button
               onClick={onOpenAuth}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold px-3 py-2 rounded-xl shadow-xs transition"
+              className="flex items-center gap-1.5 bg-red-700 hover:bg-red-800 active:bg-red-900 text-white text-xs sm:text-sm font-bold px-3 py-2 rounded-xl shadow-xs transition"
             >
               <User className="w-4 h-4" />
-              <span className="hidden sm:inline max-w-[120px] truncate">{user.fullName || 'Tài khoản'}</span>
+              <span className="hidden sm:inline max-w-[110px] truncate">{user.fullName || 'Tài khoản'}</span>
             </button>
 
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl lg:hidden"
+              className="p-2 text-stone-700 hover:text-stone-900 hover:bg-stone-100 rounded-xl xl:hidden"
               aria-label="Mở danh mục menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -199,16 +255,16 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile Drawer / Dropdown */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-6 space-y-3 shadow-lg">
+        <div className="xl:hidden border-t border-amber-200/80 bg-white px-4 pt-3 pb-6 space-y-3 shadow-lg">
           {/* Mobile Search */}
           <div className="relative w-full">
-            <Search className="w-4 h-4 text-slate-700 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-stone-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Tìm kiếm lễ hội, di sản..."
+              placeholder={t.nav.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 text-sm pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500"
+              className="w-full bg-amber-50/50 text-sm pl-9 pr-4 py-2.5 rounded-xl border border-amber-200 focus:outline-none focus:border-red-600"
             />
           </div>
 
@@ -223,8 +279,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={() => handleSelectTab(item.id)}
                   className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition ${
                     isActive
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                      ? 'bg-red-700 text-white shadow-xs font-bold'
+                      : 'bg-stone-50 text-stone-700 hover:bg-amber-50'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -234,13 +290,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             })}
           </div>
 
-          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-700">
-            <span>Vai trò: <strong>{user.role === 'admin' ? 'Quản trị viên (CMS)' : 'Độc giả'}</strong></span>
+          <div className="pt-2 border-t border-stone-100 flex items-center justify-between text-xs text-stone-700">
+            <span>
+              {lang === 'vi' ? 'Ngôn ngữ: ' : 'Language: '}
+              <strong>{lang === 'vi' ? 'Tiếng Việt' : 'English'}</strong>
+            </span>
             <button
-              onClick={onToggleRole}
-              className="text-blue-600 font-bold hover:underline"
+              onClick={() => onLanguageChange(lang === 'vi' ? 'en' : 'vi')}
+              className="text-red-700 font-bold hover:underline"
             >
-              Chuyển sang {user.role === 'admin' ? 'Người dùng' : 'Quản trị viên'}
+              {lang === 'vi' ? 'Switch to English' : 'Đổi sang Tiếng Việt'}
             </button>
           </div>
         </div>

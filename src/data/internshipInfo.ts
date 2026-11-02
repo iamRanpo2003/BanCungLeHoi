@@ -1,9 +1,9 @@
 import { InternshipConfig } from '../types/festival';
 
 export const DEFAULT_INTERNSHIP_INFO: InternshipConfig = {
-  studentName: 'Nguyễn Văn Hải',
-  studentId: 'PK02752',
-  groupNumber: 'Nhóm 03',
+  studentName: 'Nguyễn Viết Hải',
+  studentId: 'PH63500',
+  groupNumber: 'Nhóm 01',
   program: 'Chương trình Thực tập sinh Đợt 15',
   school: 'Trường Cao đẳng FPT Polytechnic',
   partnerCompany: 'Công ty Cổ phần Công nghệ IMTA TECH',
@@ -16,7 +16,10 @@ export function getInternshipInfo(): InternshipConfig {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      return { ...DEFAULT_INTERNSHIP_INFO, ...JSON.parse(saved) };
+      const parsed = JSON.parse(saved);
+      if (parsed.studentId === 'PK02752') parsed.studentId = 'PH63500';
+      if (parsed.groupNumber === 'Nhóm 03') parsed.groupNumber = 'Nhóm 01';
+      return { ...DEFAULT_INTERNSHIP_INFO, ...parsed };
     }
   } catch {
     // fallback

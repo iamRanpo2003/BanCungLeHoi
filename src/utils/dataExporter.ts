@@ -61,19 +61,29 @@ export function exportToCSV(events: CalculatedEventInstance[]): void {
     'Cơ quan ban hành',
   ];
 
+  // Hàm chống tấn công CSV Injection (Formula Injection: =, +, -, @, tab, cr)
+  const sanitizeCSV = (str: string | undefined): string => {
+    if (!str) return '""';
+    let val = str.replace(/"/g, '""');
+    if (/^[=\+\-@\t\r]/.test(val)) {
+      val = `'${val}`;
+    }
+    return `"${val}"`;
+  };
+
   const rows = events.map((item) => [
-    `"${item.event.id}"`,
-    `"${item.event.name.replace(/"/g, '""')}"`,
-    `"${item.event.category}"`,
-    `"${item.event.ethnicGroup}"`,
-    `"${item.event.region}"`,
-    `"${item.event.province}"`,
-    `"${item.event.locationName.replace(/"/g, '""')}"`,
-    `"${item.solarStartDate}"`,
-    `"${item.solarEndDate}"`,
-    `"${item.lunarStartDateText}"`,
-    `"${item.event.legalBasis.documentNumber.replace(/"/g, '""')}"`,
-    `"${item.event.legalBasis.issuingAuthority.replace(/"/g, '""')}"`,
+    sanitizeCSV(item.event.id),
+    sanitizeCSV(item.event.name),
+    sanitizeCSV(item.event.category),
+    sanitizeCSV(item.event.ethnicGroup),
+    sanitizeCSV(item.event.region),
+    sanitizeCSV(item.event.province),
+    sanitizeCSV(item.event.locationName),
+    sanitizeCSV(item.solarStartDate),
+    sanitizeCSV(item.solarEndDate),
+    sanitizeCSV(item.lunarStartDateText),
+    sanitizeCSV(item.event.legalBasis.documentNumber),
+    sanitizeCSV(item.event.legalBasis.issuingAuthority),
   ]);
 
   const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n');
