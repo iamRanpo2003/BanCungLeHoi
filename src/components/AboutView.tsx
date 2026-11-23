@@ -12,17 +12,22 @@ import {
   Database,
   Globe,
   Award,
+  ExternalLink,
+  Sparkles,
 } from 'lucide-react';
-import { InternshipConfig, AppLanguage } from '../types/festival';
+import { InternshipConfig, AppLanguage, FestivalEvent } from '../types/festival';
 import { getInternshipInfo, saveInternshipInfo } from '../data/internshipInfo';
-import { LEGAL_DISCLAIMER } from '../data/legalReferences';
+import { LEGAL_DISCLAIMER, AUTHORITATIVE_SOURCES } from '../data/legalReferences';
+import { FESTIVALS_DATA } from '../data/festivalsData';
 import { getTranslation } from '../utils/i18n';
+import { isValidPublicUrl } from '../utils/urlValidator';
 
 interface AboutViewProps {
   lang?: AppLanguage;
+  events?: FestivalEvent[];
 }
 
-export const AboutView: React.FC<AboutViewProps> = ({ lang = 'vi' }) => {
+export const AboutView: React.FC<AboutViewProps> = ({ lang = 'vi', events = FESTIVALS_DATA }) => {
   const [internship, setInternship] = useState<InternshipConfig>(() => getInternshipInfo());
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(internship.studentName);
@@ -58,8 +63,8 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang = 'vi' }) => {
         </h1>
         <p className="text-xs sm:text-base text-amber-100 max-w-2xl leading-relaxed">
           {lang === 'vi'
-            ? 'Nền tảng tra cứu lịch lễ hội truyền thống toàn quốc, bảo tồn và lan tỏa giá trị văn hóa 54 dân tộc Việt Nam với độ chính xác cao về thiên văn học và pháp lý.'
-            : 'A national portal for researching traditional festivals, preserving and sharing cultural values of the 54 ethnic groups of Vietnam with astronomical and legal precision.'}
+            ? `Nền tảng mở (không cần đăng nhập) hỗ trợ tra cứu lịch Âm - Dương và thông tin văn hóa cho ${events.length} lễ hội, phong tục và sự kiện lịch sử tiêu biểu tại Việt Nam.`
+            : `An open public portal (no login required) for researching Lunar-Solar schedules and cultural heritage for ${events.length} digitized Vietnamese festivals, customs, and historical events.`}
         </p>
       </div>
 
@@ -153,15 +158,15 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang = 'vi' }) => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs text-stone-700">
             <div className="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-amber-200">
               <GraduationCap className="w-4 h-4 text-red-700 shrink-0" />
-              <span>Đơn vị đào tạo: <strong>FPT Polytechnic</strong></span>
+              <span>{lang === 'vi' ? 'Đơn vị đào tạo:' : 'Institution:'} <strong>FPT Polytechnic</strong></span>
             </div>
             <div className="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-amber-200">
               <Building2 className="w-4 h-4 text-red-700 shrink-0" />
-              <span>Doanh nghiệp hướng dẫn: <strong>IMTA TECH</strong></span>
+              <span>{lang === 'vi' ? 'Doanh nghiệp hướng dẫn:' : 'Partner Company:'} <strong>IMTA TECH</strong></span>
             </div>
             <div className="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-amber-200">
               <Calendar className="w-4 h-4 text-red-700 shrink-0" />
-              <span>Thời gian: <strong>Đợt 15 (Năm 2026)</strong></span>
+              <span>{lang === 'vi' ? 'Thời gian:' : 'Cohort:'} <strong>{lang === 'vi' ? 'Đợt 15 (Năm 2026)' : 'Batch 15 (2026)'}</strong></span>
             </div>
           </div>
         </div>
@@ -226,34 +231,100 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang = 'vi' }) => {
         <div className="bg-white p-6 rounded-3xl border border-stone-200 shadow-xs space-y-3">
           <div className="flex items-center gap-2 text-red-800 font-bold text-sm">
             <Database className="w-5 h-5" />
-            <span>{lang === 'vi' ? 'Nguồn Dữ Liệu Chính Thống' : 'Official Data Sources'}</span>
+            <span>{lang === 'vi' ? 'Mục Nguồn Dữ Liệu Chính Thống' : 'Official Data Sources'}</span>
           </div>
           <ul className="text-xs sm:text-sm text-stone-700 space-y-2 leading-relaxed">
-            <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <span><strong>Cơ sở dữ liệu Nhà nước:</strong> Danh mục Di sản văn hóa phi vật thể Quốc gia do Bộ Văn hóa, Thể thao và Du lịch công bố.</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <span><strong>Cơ sở dữ liệu Địa phương:</strong> Hồ sơ khoa học từ các Sở VHTTDL tỉnh thành và Ban quản lý di tích lịch sử - văn hóa.</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <span><strong>Cộng đồng & Điền dã:</strong> Tư liệu trải nghiệm, hình ảnh check-in và câu chuyện văn hóa đã qua quy trình kiểm duyệt CMS.</span>
-            </li>
+            {AUTHORITATIVE_SOURCES.map((src) => (
+              <li key={src.id} className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong>{lang === 'en' ? src.nameEn : src.name}</strong> ({src.organization})
+                  {isValidPublicUrl(src.url) && (
+                    <>
+                      {' — '}
+                      <a
+                        href={src.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-red-800 font-semibold hover:underline"
+                      >
+                        <span>{src.url}</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </>
+                  )}
+                </div>
+              </li>
+            ))}
           </ul>
         </div>
 
         <div className="bg-white p-6 rounded-3xl border border-stone-200 shadow-xs space-y-3">
           <div className="flex items-center gap-2 text-red-800 font-bold text-sm">
             <Code2 className="w-5 h-5" />
-            <span>{lang === 'vi' ? 'Thuật Toán Quy Đổi Âm - Dương Lịch' : 'Astronomical Lunar-Solar Engine'}</span>
+            <span>{lang === 'vi' ? 'Thuật Toán Quy Đổi & Địa Danh 2025' : 'Astronomical Engine & 2025 Geography'}</span>
           </div>
           <p className="text-xs sm:text-sm text-stone-700 leading-relaxed">
-            Hệ thống áp dụng thuật toán tính Âm lịch Việt Nam chuẩn múi giờ GMT+7 của nhà toán học Hồ Ngọc Đức dựa trên công thức cơ học thiên văn của Jean Meeus. Tự động quy đổi các ngày lễ âm lịch truyền thống sang ngày dương lịch tương ứng theo từng năm, bảo đảm tuyệt đối tính chính xác khi hiển thị trên lịch điện tử.
+            {lang === 'vi'
+              ? 'Hệ thống áp dụng thuật toán tính Âm lịch Việt Nam chuẩn múi giờ GMT+7 của nhà toán học Hồ Ngọc Đức dựa trên công thức cơ học thiên văn của Jean Meeus. Địa danh các tỉnh/thành đã được rà soát theo Nghị quyết 202/2025/QH15 (34 đơn vị cấp tỉnh, mô hình chính quyền 2 cấp) và ghi chú song song tên gọi trước sáp nhập.'
+              : 'Uses Dr. Ho Ngoc Duc’s GMT+7 Vietnamese Lunar-Solar astronomical calculation based on Jean Meeus’s formulas. Provincial names follow Vietnam’s 2025 reorganization (Resolution 202/2025/QH15) with former names clearly preserved.'}
           </p>
         </div>
       </div>
+
+      {/* Truthfulness & Beneficiary Transparency Disclosure */}
+      <section className="bg-white p-6 rounded-3xl border border-stone-200 shadow-xs space-y-3">
+        <div className="flex items-center gap-2 text-red-800 font-bold text-sm">
+          <Globe className="w-5 h-5" />
+          <h2 className="text-base font-black text-stone-900 font-serif">
+            {lang === 'vi'
+              ? 'Minh bạch Số liệu & Đối tượng Thụ hưởng'
+              : 'Truthful Scope & Beneficiary Disclosure'}
+          </h2>
+        </div>
+        <ul className="text-xs sm:text-sm text-stone-700 space-y-2 leading-relaxed">
+          <li className="flex items-start gap-2">
+            <Award className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+            <span>
+              {lang === 'vi'
+                ? `Quy mô dữ liệu thực tế hiện tại: ${events.length} sự kiện văn hóa/lịch sử tiêu biểu thuộc ${new Set(events.map((e) => e.province)).size} tỉnh/khu vực (trong đó có ${events.filter((e) => e.unescoRecognized).length} di sản UNESCO).`
+                : `Current digitized dataset: ${events.length} cultural and historical events across ${new Set(events.map((e) => e.province)).size} provinces/areas (including ${events.filter((e) => e.unescoRecognized).length} UNESCO-recognized items).`}
+            </span>
+          </li>
+          <li className="flex items-start gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            <span>
+              {lang === 'vi'
+                ? 'Đối tượng thụ hưởng & trạng thái triển khai: Ứng dụng mở công khai miễn phí phục vụ cộng đồng, du khách, người cao tuổi/khiếm thị (hỗ trợ trợ năng đọc to và chữ lớn) và mục đích đánh giá thực tập; hiện là bản thử nghiệm nên không thống kê hay công bố số người thụ hưởng phóng đại.'
+                : 'Beneficiaries & deployment status: Free public pilot serving general visitors, researchers, elderly/low-vision users (large text, high contrast, voice reader), and internship evaluation; currently a pilot release with no inflated beneficiary headcount claimed.'}
+            </span>
+          </li>
+          <li className="flex items-start gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            <span>
+              {lang === 'vi'
+                ? 'Quyền riêng tư & Thu thập dữ liệu: Ứng dụng mở công khai hoàn toàn, không yêu cầu đăng nhập và không gửi dữ liệu cá nhân về máy chủ. Nếu người dùng tự nguyện nhập tên hiển thị, email hoặc số điện thoại ở mục Hồ sơ / Cộng đồng, thông tin chỉ lưu cục bộ trên trình duyệt nhằm giữ tùy chọn cá nhân hoặc điền sẵn tên tác giả và có thể xóa bất cứ lúc nào.'
+                : 'Privacy & Data Collection Disclosure: Public open access with no login or server-side personal data collection. Optional profile fields (name, email, phone) are stored solely in your local browser to retain preferences or prefill story authorship and can be cleared anytime.'}
+            </span>
+          </li>
+          <li className="flex items-start gap-2">
+            <Sparkles className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+            <span>
+              {lang === 'vi'
+                ? 'Lưu ý nội dung do Gemini AI tạo: Toàn bộ yêu cầu AI đi qua máy chủ ứng dụng (/api/gemini/cultural-guide) mà không lộ khóa API trên trình duyệt; mọi câu trả lời đều tách bạch phần đã đối chiếu hồ sơ di sản của cổng và phần mở rộng chưa kiểm chứng thủ công.'
+                : 'Gemini AI Content Review: All AI requests route securely via the backend server (/api/gemini/cultural-guide) with zero client API key exposure, and explicitly label reviewed portal context versus unverified AI-generated extensions.'}
+            </span>
+          </li>
+          <li className="flex items-start gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            <span>
+              {lang === 'vi'
+                ? 'Đạo đức tư liệu, bản quyền ảnh/âm thanh & quyền riêng tư: Toàn bộ ảnh dùng ảnh chụp thật có giấy phép mở Pexels kèm số ID nguồn (không dùng ảnh AI giả làm di tích/hiện vật/nghệ nhân thật); âm thanh đọc to tổng hợp cục bộ qua Web Speech API; biểu mẫu cộng đồng yêu cầu cam kết giữ kín phần người giữ tư liệu dặn không công bố và không đăng thông tin riêng người khác.'
+                : 'Media & Custodial Ethics: All imagery uses real Pexels-licensed photography with explicit photo IDs (zero AI images depicting real monuments, artifacts, or artisans), audio relies on local browser Web Speech API, and submissions require custodian non-disclosure and third-party privacy consent.'}
+            </span>
+          </li>
+        </ul>
+      </section>
 
       {/* Mandatory Disclaimer */}
       <div className="bg-amber-50/90 border-2 border-amber-300 rounded-3xl p-5 text-amber-950 text-xs sm:text-sm leading-relaxed flex items-start gap-3">

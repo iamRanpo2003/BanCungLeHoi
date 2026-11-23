@@ -347,9 +347,8 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
               <option value="All">{t.calendar.filterAllRegions}</option>
               <option value="Bắc">{lang === 'vi' ? 'Miền Bắc' : 'Northern'}</option>
               <option value="Trung">{lang === 'vi' ? 'Miền Trung' : 'Central'}</option>
-              <option value="Nam">{lang === 'vi' ? 'Miền Nam' : 'Southern'}</option>
-              <option value="Tây Nguyên">{lang === 'vi' ? 'Tây Nguyên' : 'Highlands'}</option>
-              <option value="Tây Nam Bộ">{lang === 'vi' ? 'Tây Nam Bộ' : 'Mekong Delta'}</option>
+              <option value="Nam">{lang === 'vi' ? 'Miền Nam (bao gồm Tây Nam Bộ)' : 'Southern & Mekong Delta'}</option>
+              <option value="Tây Nguyên">{lang === 'vi' ? 'Tây Nguyên' : 'Central Highlands'}</option>
             </select>
 
             {/* Category Filter */}
@@ -369,7 +368,7 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
             <select
               value={selectedProvince}
               onChange={(e) => setSelectedProvince(e.target.value)}
-              className="bg-stone-50 border border-stone-200 rounded-xl px-3 py-1.5 font-semibold text-stone-700 focus:outline-none max-w-[150px]"
+              className="bg-stone-50 border border-stone-200 rounded-xl px-3 py-1.5 font-semibold text-stone-700 focus:outline-none max-w-[240px]"
             >
               <option value="All">{t.calendar.filterAllProvinces}</option>
               {provinces.map((p) => (
@@ -436,7 +435,8 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
 
       {/* Grid Calendar Presentation */}
       {viewMode === 'grid' ? (
-        <div className="bg-white rounded-3xl border border-amber-200/80 shadow-xs overflow-hidden">
+        <div className="bg-white rounded-3xl border border-amber-200/80 shadow-xs overflow-x-auto">
+          <div className="min-w-[640px]">
           {/* Day of week headers */}
           <div className="grid grid-cols-7 border-b border-stone-200 bg-amber-50/50 text-center py-2.5 text-xs font-bold text-stone-700">
             {weekDayHeaders.map((d, idx) => (
@@ -511,6 +511,7 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
                 </div>
               );
             })}
+          </div>
           </div>
         </div>
       ) : (

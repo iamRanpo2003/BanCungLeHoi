@@ -1,6 +1,6 @@
 {
-  "name": "Bancunglehoi - Lịch Lễ Hội Truyền Thống Toàn Quốc",
-  "description": "Nền tảng tra cứu lịch lễ hội truyền thống 54 dân tộc Việt Nam, quy đổi âm - dương lịch chuẩn xác, bản đồ di sản, nghi thức văn hóa và trích xuất dữ liệu chính thống.",
+  "name": "Bancunglehoi - Cổng Thông Tin Lễ Hội & Di Sản Văn Hóa Việt Nam",
+  "description": "Ứng dụng web công khai tra cứu 18 lễ hội truyền thống, phong tục và sự kiện lịch sử tiêu biểu tại Việt Nam; quy đổi âm - dương lịch GMT+7, bản đồ di sản và trích xuất dữ liệu không cần đăng nhập.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

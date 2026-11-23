@@ -1,18 +1,18 @@
 import { UserProfile } from '../types/festival';
 
 export const DEFAULT_USER: UserProfile = {
-  id: 'usr-default',
-  fullName: 'Nguyễn Viết Hải',
-  email: 'hai2752003hai@gmail.com',
-  phone: '0987654321',
+  id: 'usr-visitor',
+  fullName: 'Khách tham quan',
+  email: '',
+  phone: '',
   role: 'user',
-  interests: ['Lễ hội', 'Sự kiện lịch sử', 'Văn hóa 54 dân tộc', 'Di sản UNESCO'],
+  interests: ['Lễ hội dân gian cổ truyền', 'Sự kiện lịch sử', 'Di sản UNESCO'],
   bookmarks: ['gio-to-hung-vuong', 'hoi-giong-phu-dong-soc-son', 'khong-gian-van-hoa-cong-chieng-tay-nguyen'],
   reminders: [
     { festivalId: 'gio-to-hung-vuong', daysBefore: 3 },
     { festivalId: 'le-hoi-kate-dong-bao-cham', daysBefore: 1 },
   ],
-  contributions: ['story-1'],
+  contributions: [],
 };
 
 const USER_STORAGE_KEY = 'bancunglehoi_user_profile';
@@ -63,4 +63,16 @@ export function switchUserRole(role: 'user' | 'admin'): UserProfile {
   user.role = role;
   saveUserProfile(user);
   return user;
+}
+
+export function clearPersonalProfileData(): UserProfile {
+  const current = getUserProfile();
+  const cleaned: UserProfile = {
+    ...current,
+    fullName: DEFAULT_USER.fullName,
+    email: '',
+    phone: '',
+  };
+  saveUserProfile(cleaned);
+  return cleaned;
 }

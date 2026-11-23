@@ -133,7 +133,7 @@ export const MapView: React.FC<MapViewProps> = ({
             </select>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-stone-100 p-1 rounded-xl text-xs">
+          <div className="flex flex-wrap items-center gap-1 bg-stone-100 p-1 rounded-xl text-xs">
             <button
               onClick={() => setFilterRegion('All')}
               className={`px-2.5 py-1 rounded-lg font-bold transition ${
@@ -148,7 +148,7 @@ export const MapView: React.FC<MapViewProps> = ({
                 filterRegion === 'Bắc' ? 'bg-red-700 text-white shadow-xs' : 'text-stone-600'
               }`}
             >
-              Bắc
+              {lang === 'vi' ? 'Bắc' : 'North'}
             </button>
             <button
               onClick={() => setFilterRegion('Trung')}
@@ -156,7 +156,15 @@ export const MapView: React.FC<MapViewProps> = ({
                 filterRegion === 'Trung' ? 'bg-red-700 text-white shadow-xs' : 'text-stone-600'
               }`}
             >
-              Trung
+              {lang === 'vi' ? 'Trung' : 'Central'}
+            </button>
+            <button
+              onClick={() => setFilterRegion('Tây Nguyên')}
+              className={`px-2 py-1 rounded-lg font-bold transition ${
+                filterRegion === 'Tây Nguyên' ? 'bg-red-700 text-white shadow-xs' : 'text-stone-600'
+              }`}
+            >
+              {lang === 'vi' ? 'Tây Nguyên' : 'Highlands'}
             </button>
             <button
               onClick={() => setFilterRegion('Nam')}
@@ -164,7 +172,7 @@ export const MapView: React.FC<MapViewProps> = ({
                 filterRegion === 'Nam' ? 'bg-red-700 text-white shadow-xs' : 'text-stone-600'
               }`}
             >
-              Nam
+              {lang === 'vi' ? 'Nam' : 'South'}
             </button>
           </div>
         </div>

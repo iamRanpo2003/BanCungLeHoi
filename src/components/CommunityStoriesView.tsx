@@ -11,6 +11,9 @@ import {
   Send,
   X,
   Plus,
+  Camera,
+  AlertTriangle,
+  ShieldCheck,
 } from 'lucide-react';
 import { CommunityStory, FestivalEvent, UserProfile, AppLanguage } from '../types/festival';
 import { getStoredStories, saveStory, likeStory } from '../data/communityData';
@@ -22,6 +25,7 @@ import {
   StoryFormDraft,
 } from '../utils/storage';
 import { getTranslation } from '../utils/i18n';
+import { getMediaAttribution, validateCommunitySafeguards } from '../utils/mediaAttribution';
 
 interface CommunityStoriesViewProps {
   festivals: FestivalEvent[];
@@ -59,6 +63,11 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
   const [content, setContent] = useState(savedDraft.content || '');
   const [sourceReference, setSourceReference] = useState(savedDraft.sourceReference || '');
   const [imageUrl, setImageUrl] = useState(savedDraft.imageUrl || '');
+  const [postAnonymously, setPostAnonymously] = useState(false);
+  const [consentMediaLicense, setConsentMediaLicense] = useState(false);
+  const [consentRestrictedExcluded, setConsentRestrictedExcluded] = useState(false);
+  const [consentPrivacyNonDisclosure, setConsentPrivacyNonDisclosure] = useState(false);
+  const [formError, setFormError] = useState('');
 
   // Auto-save form draft on every input change
   const handleDraftChange = (field: keyof StoryFormDraft, value: string) => {
@@ -90,26 +99,39 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
     setStories(getStoredStories());
   };
 
-  const isValidHttpUrl = (urlStr: string): boolean => {
-    try {
-      const parsed = new URL(urlStr);
-      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-    } catch {
-      return false;
-    }
-  };
-
   const handleSubmitStory = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
+
+    const validation = validateCommunitySafeguards({
+      consentMediaLicense,
+      consentRestrictedExcluded,
+      consentPrivacyNonDisclosure,
+      customImageUrl: imageUrl,
+      sourceReference,
+      content: `${title} ${content}`,
+    });
+
+    if (!validation.valid) {
+      setFormError(lang === 'vi' ? (validation.errorVi || '') : (validation.errorEn || ''));
+      return;
+    }
+
     const chosenFest = festivals.find((f) => f.id === selectedFestivalId);
-    const safeImage =
-      imageUrl.trim() && isValidHttpUrl(imageUrl.trim())
-        ? imageUrl.trim()
-        : 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80';
+    const hasCustomImage = Boolean(imageUrl.trim());
+    const safeImage = hasCustomImage
+      ? imageUrl.trim()
+      : 'https://images.pexels.com/photos/35343332/pexels-photo-35343332.jpeg?auto=compress&cs=tinysrgb&w=800';
+
+    const displayAuthor = postAnonymously
+      ? lang === 'vi'
+        ? 'Khách tham quan ẩn danh'
+        : 'Anonymous Visitor'
+      : authorName.trim() || (lang === 'vi' ? 'Khách tham quan' : 'Visitor');
 
     saveStory({
       title: title.trim(),
-      authorName: authorName.trim(),
+      authorName: displayAuthor,
       authorRole,
       festivalId: selectedFestivalId,
       festivalName: chosenFest ? (lang === 'en' && chosenFest.en?.name ? chosenFest.en.name : chosenFest.name) : 'Lễ hội dân gian địa phương',
@@ -118,7 +140,15 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
       content: content.trim(),
       images: [safeImage],
       tags: [chosenFest?.province || 'Văn hóa', ethnicGroup, 'Cộng đồng'],
-      sourceReference: sourceReference.trim() || 'Tư liệu điền dã dân gian của tác giả',
+      sourceReference:
+        sourceReference.trim() ||
+        (hasCustomImage
+          ? 'Ảnh/tư liệu do tác giả xác nhận bản quyền'
+          : 'Ghi chép trải nghiệm cá nhân • Ảnh minh họa Pexels #35343332'),
+      mediaLicenseConfirmed: consentMediaLicense,
+      restrictedContentExcluded: consentRestrictedExcluded,
+      privacyConsentConfirmed: consentPrivacyNonDisclosure,
+      postAnonymously,
     });
 
     setStories(getStoredStories());
@@ -132,6 +162,10 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
       setContent('');
       setSourceReference('');
       setImageUrl('');
+      setConsentMediaLicense(false);
+      setConsentRestrictedExcluded(false);
+      setConsentPrivacyNonDisclosure(false);
+      setPostAnonymously(false);
     }, 2000);
   };
 
@@ -190,18 +224,16 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
         >
           {lang === 'vi' ? 'Bài viết của tôi' : 'My Contributions'}
         </button>
-        {user.role === 'admin' && (
-          <button
-            onClick={() => setFilterType('pending')}
-            className={`px-4 py-2 text-xs font-bold rounded-xl transition ${
-              filterType === 'pending'
-                ? 'bg-amber-600 text-white shadow-xs'
-                : 'bg-white text-stone-600 hover:bg-stone-50 border border-stone-200'
-            }`}
-          >
-            {lang === 'vi' ? 'Đang chờ duyệt' : 'Pending Moderation'}
-          </button>
-        )}
+        <button
+          onClick={() => setFilterType('pending')}
+          className={`px-4 py-2 text-xs font-bold rounded-xl transition ${
+            filterType === 'pending'
+              ? 'bg-amber-600 text-white shadow-xs'
+              : 'bg-white text-stone-600 hover:bg-stone-50 border border-stone-200'
+          }`}
+        >
+          {lang === 'vi' ? 'Đang chờ duyệt' : 'Pending Moderation'}
+        </button>
       </div>
 
       {/* Submit Story Modal with draft persistence */}
@@ -224,6 +256,15 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
               >
                 <X className="w-5 h-5" />
               </button>
+            </div>
+
+            <div className="p-3 rounded-2xl bg-amber-50/80 border border-amber-200 text-xs text-amber-950 leading-relaxed flex items-start gap-2">
+              <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+              <span>
+                {lang === 'vi'
+                  ? 'Mục đích lưu trữ: Tên tác giả và nội dung bài viết chỉ lưu cục bộ trên trình duyệt (LocalStorage) để bạn xem lại và quản lý trên thiết bị này, không tự động thu thập hay gửi dữ liệu cá nhân về máy chủ.'
+                  : 'Storage disclosure: Your display name and story text are stored strictly in local browser storage (LocalStorage) on this device and are not transmitted to any external server.'}
+              </span>
             </div>
 
             {submitSuccess ? (
@@ -257,15 +298,29 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-stone-700 font-bold mb-1">
-                      {lang === 'vi' ? 'Tác giả chia sẻ' : 'Author Name'}
+                      {lang === 'vi' ? 'Tên hiển thị / Bút danh' : 'Display Name / Pseudonym'}
                     </label>
                     <input
                       type="text"
-                      required
-                      value={authorName}
+                      required={!postAnonymously}
+                      disabled={postAnonymously}
+                      value={postAnonymously ? (lang === 'vi' ? 'Khách tham quan ẩn danh' : 'Anonymous Visitor') : authorName}
                       onChange={(e) => handleDraftChange('authorName', e.target.value)}
-                      className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-red-600"
+                      className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-red-600 disabled:opacity-60"
                     />
+                    <label className="flex items-center gap-2 mt-1.5 text-[11px] text-stone-600 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={postAnonymously}
+                        onChange={(e) => setPostAnonymously(e.target.checked)}
+                        className="rounded border-stone-300 text-red-700 focus:ring-red-600"
+                      />
+                      <span>
+                        {lang === 'vi'
+                          ? 'Đăng ẩn danh (không hiển thị tên cá nhân)'
+                          : 'Post anonymously (do not display personal name)'}
+                      </span>
+                    </label>
                   </div>
                   <div>
                     <label className="block text-stone-700 font-bold mb-1">
@@ -354,7 +409,9 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
 
                 <div>
                   <label className="block text-stone-700 font-bold mb-1">
-                    {lang === 'vi' ? 'Link ảnh minh họa (tùy chọn)' : 'Illustration Image URL (Optional)'}
+                    {lang === 'vi'
+                      ? 'Link ảnh thật minh họa (tùy chọn — bắt buộc ghi nguồn bên trên nếu nhập)'
+                      : 'Real Photo URL (optional — source credit required above if entered)'}
                   </label>
                   <input
                     type="url"
@@ -364,6 +421,70 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
                     className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-red-600"
                   />
                 </div>
+
+                {/* Mandatory Ethics, Attribution, Custodian & Privacy Safeguards */}
+                <div className="bg-stone-50 border border-stone-200 rounded-2xl p-3.5 space-y-2.5">
+                  <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-red-900 uppercase tracking-wider">
+                    <ShieldCheck className="w-4 h-4 text-red-700 shrink-0" />
+                    <span>
+                      {lang === 'vi'
+                        ? 'Cam kết Nguồn Tư liệu, Quyền riêng tư & Tôn trọng Di sản *'
+                        : 'Mandatory Attribution, Custodian & Privacy Safeguards *'}
+                    </span>
+                  </div>
+
+                  <label className="flex items-start gap-2 text-[11px] text-stone-700 leading-relaxed cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={consentMediaLicense}
+                      onChange={(e) => setConsentMediaLicense(e.target.checked)}
+                      className="mt-0.5 rounded border-stone-300 text-red-700 focus:ring-red-600 shrink-0"
+                    />
+                    <span>
+                      {lang === 'vi'
+                        ? 'Ảnh, âm thanh hoặc tư liệu đính kèm đều có phép sử dụng, ghi rõ nguồn gốc và KHÔNG dùng ảnh do AI/máy sinh để thay cho hiện vật, di tích hay nghệ nhân có thật.'
+                        : 'Any attached photos/notes are permitted and properly credited, and do NOT use AI-generated images to replace real artifacts, monuments, or artisans.'}
+                    </span>
+                  </label>
+
+                  <label className="flex items-start gap-2 text-[11px] text-stone-700 leading-relaxed cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={consentRestrictedExcluded}
+                      onChange={(e) => setConsentRestrictedExcluded(e.target.checked)}
+                      className="mt-0.5 rounded border-stone-300 text-red-700 focus:ring-red-600 shrink-0"
+                    />
+                    <span>
+                      {lang === 'vi'
+                        ? 'Tôi đã loại bỏ các nghi lễ mật, bí quyết hoặc phần thông tin mà nghệ nhân, bô lão hoặc người giữ tư liệu dặn không công bố.'
+                        : 'I confirm all restricted rites, sacred lore, or details that tradition custodians asked to keep unpublished are excluded.'}
+                    </span>
+                  </label>
+
+                  <label className="flex items-start gap-2 text-[11px] text-stone-700 leading-relaxed cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={consentPrivacyNonDisclosure}
+                      onChange={(e) => setConsentPrivacyNonDisclosure(e.target.checked)}
+                      className="mt-0.5 rounded border-stone-300 text-red-700 focus:ring-red-600 shrink-0"
+                    />
+                    <span>
+                      {lang === 'vi'
+                        ? 'Tôi đồng ý hiển thị bút danh đã chọn và cam kết KHÔNG công bố thông tin riêng của người khác (số điện thoại, email, địa chỉ riêng, ảnh cá nhân) khi chưa có sự đồng ý.'
+                        : 'I consent to displaying the chosen pseudonym and commit NOT to publish anyone else’s private data (phone, email, address, private photos) without consent.'}
+                    </span>
+                  </label>
+                </div>
+
+                {formError && (
+                  <div
+                    role="alert"
+                    className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-800 text-[11px] font-semibold flex items-start gap-2"
+                  >
+                    <AlertTriangle className="w-4 h-4 text-red-700 shrink-0 mt-0.5" />
+                    <span>{formError}</span>
+                  </div>
+                )}
 
                 <div className="flex justify-end gap-2 pt-2 border-t border-stone-100">
                   <button
@@ -375,7 +496,7 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 bg-red-700 hover:bg-red-800 text-white font-bold rounded-xl shadow-xs"
+                    className="px-5 py-2 bg-red-700 hover:bg-red-800 text-white font-bold rounded-xl shadow-xs cursor-pointer"
                   >
                     {lang === 'vi' ? 'Gửi duyệt bài viết' : 'Submit for Review'}
                   </button>
@@ -399,16 +520,24 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
                   <img
                     src={story.images[0]}
                     alt={story.title}
+                    loading="lazy"
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute top-3 left-3 bg-red-700 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-xs">
                     {story.festivalName}
                   </div>
-                  {story.status === 'pending' && (
-                    <div className="absolute top-3 right-3 bg-amber-500 text-stone-950 text-[10px] font-bold px-2 py-0.5 rounded">
-                      {lang === 'vi' ? 'Chờ kiểm duyệt' : 'Pending review'}
-                    </div>
-                  )}
+                  <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                    {story.isSample && (
+                      <span className="bg-stone-900/85 text-amber-200 text-[10px] font-bold px-2 py-0.5 rounded border border-amber-400/40">
+                        {lang === 'vi' ? 'Mẫu minh họa' : 'Illustrative Sample'}
+                      </span>
+                    )}
+                    {story.status === 'pending' && (
+                      <span className="bg-amber-500 text-stone-950 text-[10px] font-bold px-2 py-0.5 rounded">
+                        {lang === 'vi' ? 'Chờ kiểm duyệt' : 'Pending review'}
+                      </span>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -426,8 +555,20 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
                   {story.content}
                 </p>
 
-                <div className="text-[11px] text-stone-400 italic">
-                  {lang === 'vi' ? 'Nguồn: ' : 'Source: '} {story.sourceReference}
+                <div className="space-y-1 text-[11px] text-stone-500">
+                  <div className="italic">
+                    {lang === 'vi' ? 'Nguồn tư liệu: ' : 'Source: '} {story.sourceReference}
+                  </div>
+                  {story.images?.[0] && (
+                    <div className="flex items-center gap-1 text-[10px] text-stone-500">
+                      <Camera className="w-3 h-3 text-amber-700 shrink-0" />
+                      <span className="truncate">
+                        {lang === 'vi'
+                          ? getMediaAttribution(story.images[0], story.sourceReference).captionVi
+                          : getMediaAttribution(story.images[0], story.sourceReference).captionEn}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

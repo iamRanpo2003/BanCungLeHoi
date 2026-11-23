@@ -19,13 +19,13 @@ export function exportToICS(events: CalculatedEventInstance[]): void {
     const nowStr = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
 
     icsContent.push('BEGIN:VEVENT');
-    icsContent.push(`UID:bancunglehoi-${item.event.id}-${item.solarStartDate}@bancunglehoi.ai.studio`);
+    icsContent.push(`UID:bancunglehoi-${item.event.id}-${item.solarStartDate}`);
     icsContent.push(`DTSTAMP:${nowStr}`);
     icsContent.push(`DTSTART;VALUE=DATE:${dtStart}`);
     icsContent.push(`DTEND;VALUE=DATE:${dtEnd}`);
     icsContent.push(`SUMMARY:${item.event.name}`);
     icsContent.push(
-      `DESCRIPTION:${item.event.name}\\nThời gian Âm lịch: ${item.lunarStartDateText}\\nĐịa điểm: ${item.event.locationName}, ${item.event.province}\\nDân tộc: ${item.event.ethnicGroup}\\nCăn cứ pháp lý: ${item.event.legalBasis.documentNumber} (${item.event.legalBasis.issuingAuthority})\\nNguồn: Bancunglehoi (bancunglehoi.ai.studio)`
+      `DESCRIPTION:${item.event.name}\\nThời gian Âm lịch: ${item.lunarStartDateText}\\nĐịa điểm: ${item.event.locationName}, ${item.event.province}\\nDân tộc: ${item.event.ethnicGroup}\\nCăn cứ pháp lý: ${item.event.legalBasis.documentNumber} (${item.event.legalBasis.issuingAuthority})\\nNguồn: Ứng dụng Bancunglehoi`
     );
     icsContent.push(`LOCATION:${item.event.locationName}, ${item.event.province}`);
     icsContent.push('STATUS:CONFIRMED');

@@ -10,7 +10,7 @@ import { DEFAULT_USER } from './userStore';
 
 // Keys for LocalStorage
 const KEYS = {
-  EVENTS_DB: 'bancunglehoi_events_db',
+  EVENTS_DB: 'bancunglehoi_events_db_v2',
   USER_PROFILE: 'bancunglehoi_user_profile',
   COMMUNITY_STORIES: 'bancunglehoi_community_stories',
   APP_LANGUAGE: 'bancunglehoi_language',
@@ -144,6 +144,7 @@ export interface AdminEventDraft {
   documentNumber: string;
   issuingAuthority: string;
   imageUrl: string;
+  imageSourceNote: string;
 }
 
 export const DEFAULT_ADMIN_DRAFT: AdminEventDraft = {
@@ -162,6 +163,7 @@ export const DEFAULT_ADMIN_DRAFT: AdminEventDraft = {
   documentNumber: '',
   issuingAuthority: 'Bộ Văn hóa, Thể thao và Du lịch',
   imageUrl: '',
+  imageSourceNote: '',
 };
 
 export function getSavedAdminDraft(): AdminEventDraft {

@@ -22,6 +22,7 @@ import {
 } from './types/festival';
 import {
   getUserProfile,
+  saveUserProfile,
   toggleBookmark,
   setFestivalReminder,
   switchUserRole,
@@ -96,6 +97,12 @@ export default function App() {
     setUser(getUserProfile());
   };
 
+  // Persist full user preferences update
+  const handleUpdateUser = (updatedUser: UserProfile) => {
+    setUser(updatedUser);
+    saveUserProfile(updatedUser);
+  };
+
   // Set reminder handler
   const handleSetReminder = (id: string, days: number) => {
     setFestivalReminder(id, days);
@@ -150,8 +157,8 @@ export default function App() {
     if (currentTab === 'home') {
       textToRead =
         lang === 'vi'
-          ? `Chào mừng bạn đến với Bạn Cùng Lễ Hội. Nền tảng tra cứu lịch lễ hội truyền thống toàn quốc và bản đồ di sản 54 dân tộc Việt Nam. Hiện có ${events.length} lễ hội và sự kiện lịch sử được số hóa và chuẩn hóa theo Bộ Văn hóa Thể thao và Du lịch.`
-          : `Welcome to Bancunglehoi. The interactive national festival portal and heritage map of 54 ethnic groups of Vietnam. There are currently ${events.length} festivals and historical events standardized by the Ministry of Culture, Sports and Tourism.`;
+          ? `Chào mừng bạn đến với Bạn Cùng Lễ Hội. Cổng tra cứu mở lịch lễ hội truyền thống và di sản văn hóa Việt Nam, truy cập công khai không cần đăng nhập. Hiện có ${events.length} lễ hội, phong tục và sự kiện lịch sử đã được số hóa và đối chiếu văn bản Bộ Văn hóa Thể thao và Du lịch.`
+          : `Welcome to Bancunglehoi. An open public portal for Vietnamese traditional festivals and cultural heritage with no login required. Currently featuring ${events.length} digitized festivals, customs, and historical events.`;
     } else if (currentTab === 'calendar') {
       textToRead =
         lang === 'vi'
@@ -160,7 +167,7 @@ export default function App() {
     } else if (currentTab === 'map') {
       textToRead =
         lang === 'vi'
-          ? `Bạn đang ở trang Bản đồ Di sản 54 Dân tộc. Bản đồ tương tác định vị các lễ hội theo tọa độ địa lý Bắc, Trung, Nam, Tây Nguyên và Tây Nam Bộ, tự động tính cự ly di chuyển cho du khách.`
+          ? `Bạn đang ở trang Bản đồ Di sản Văn hóa Việt Nam. Bản đồ tương tác định vị các lễ hội theo tọa độ địa lý Bắc, Trung, Nam, Tây Nguyên và Tây Nam Bộ, tự động tính cự ly di chuyển cho du khách.`
           : `You are on the Interactive Heritage Map of Vietnam. It locates cultural festivals across North, Central, South, and Highlands regions with automatic distance calculations.`;
     } else if (currentTab === 'community') {
       textToRead =
@@ -170,8 +177,8 @@ export default function App() {
     } else if (currentTab === 'legal') {
       textToRead =
         lang === 'vi'
-          ? `Trang Căn cứ Pháp lý. Gồm Luật Di sản văn hóa, Nghị định 110 năm 2018 của Chính phủ và Công ước bảo vệ di sản văn hóa phi vật thể của UNESCO.`
-          : `Legal References view. Including Cultural Heritage Law, Government Decree 110/2018, and UNESCO conventions.`;
+          ? `Trang Nguồn, Ghi nhận và Căn cứ Pháp lý. Trình bày nguồn ảnh thật minh họa, giọng đọc cục bộ Web Speech API, quy ước tôn trọng người giữ tư liệu và văn bản pháp luật chính thống.`
+          : `Sources, Attribution and Legal References view, detailing real photography credits, local Web Speech API narration, custodian safeguards, and official legal documents.`;
     } else if (currentTab === 'about') {
       textToRead =
         lang === 'vi'
@@ -180,8 +187,8 @@ export default function App() {
     } else {
       textToRead =
         lang === 'vi'
-          ? `Nền tảng tra cứu lịch lễ hội truyền thống 54 dân tộc Việt Nam.`
-          : `National festival portal of 54 ethnic groups of Vietnam.`;
+          ? `Cổng tra cứu mở lịch lễ hội truyền thống và di sản văn hóa Việt Nam.`
+          : `Open public Vietnamese cultural heritage and festival portal.`;
     }
 
     tts.speak(textToRead, {
@@ -287,7 +294,7 @@ export default function App() {
             user={user}
             events={events}
             targetYear={targetYear}
-            onUpdateUser={setUser}
+            onUpdateUser={handleUpdateUser}
             onSelectEvent={setSelectedEvent}
             onRemoveBookmark={handleToggleBookmark}
             onRemoveReminder={(id) => handleSetReminder(id, 0)}
@@ -306,9 +313,9 @@ export default function App() {
           />
         )}
 
-        {currentTab === 'legal' && <LegalReferencesView lang={lang} />}
+        {currentTab === 'legal' && <LegalReferencesView lang={lang} events={events} />}
 
-        {currentTab === 'about' && <AboutView lang={lang} />}
+        {currentTab === 'about' && <AboutView lang={lang} events={events} />}
       </main>
 
       {/* Detail Modal with TTS & Bilingual Content */}
@@ -331,7 +338,7 @@ export default function App() {
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         user={user}
-        onSaveUser={setUser}
+        onSaveUser={handleUpdateUser}
       />
 
       {/* Global Heritage Footer */}
@@ -342,12 +349,12 @@ export default function App() {
               <DongSonLogo size={36} highContrast={a11y.highContrast} />
               <div>
                 <span className="font-serif font-black text-lg text-white">
-                  Bancunglehoi<span className="text-amber-400">.ai.studio</span>
+                  Bancung<span className="text-amber-400">lehoi</span>
                 </span>
                 <p className="text-xs text-stone-400">
                   {lang === 'vi'
-                    ? 'Lịch Lễ Hội Truyền Thống & Di Sản 54 Dân Tộc Toàn Quốc'
-                    : 'National Cultural Heritage & Festival Calendar of Vietnam'}
+                    ? 'Cổng Tra Cứu Mở Lễ Hội Truyền Thống & Di Sản Văn Hóa Việt Nam'
+                    : 'Open Public Portal for Vietnamese Traditional Festivals & Cultural Heritage'}
                 </p>
               </div>
             </div>

@@ -15,8 +15,9 @@ import {
   Check,
   Volume2,
   VolumeX,
-  Pause,
-  Play,
+  Camera,
+  ExternalLink,
+  ShieldCheck,
 } from 'lucide-react';
 import { FestivalEvent, AppLanguage, AccessibilitySettings } from '../types/festival';
 import { calculateEventForYear } from '../utils/festivalCalculator';
@@ -24,6 +25,9 @@ import { exportToICS } from '../utils/dataExporter';
 import { LEGAL_DISCLAIMER } from '../data/legalReferences';
 import { getTranslation } from '../utils/i18n';
 import { tts } from '../utils/textToSpeech';
+import { isValidPublicUrl } from '../utils/urlValidator';
+import { getMediaAttribution } from '../utils/mediaAttribution';
+import { GeminiCulturalAssistant } from './GeminiCulturalAssistant';
 
 interface DetailModalProps {
   event: FestivalEvent | null;
@@ -48,7 +52,7 @@ export const DetailModal: React.FC<DetailModalProps> = ({
   lang = 'vi',
   a11y,
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'rituals' | 'legal' | 'directions'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'rituals' | 'legal' | 'directions' | 'gemini'>('overview');
   const [showShareToast, setShowShareToast] = useState(false);
   const [selectedReminder, setSelectedReminder] = useState<number>(reminderDays);
   const [isSpeakingThis, setIsSpeakingThis] = useState(false);
@@ -76,11 +80,15 @@ export const DetailModal: React.FC<DetailModalProps> = ({
   const ritualsLe = lang === 'en' && event.en?.mainRituals?.le ? event.en.mainRituals.le : event.mainRituals.le;
   const ritualsHoi = lang === 'en' && event.en?.mainRituals?.hoi ? event.en.mainRituals.hoi : event.mainRituals.hoi;
   const visitorTips = lang === 'en' && event.en?.visitorAdvice ? event.en.visitorAdvice : event.visitorAdvice;
+  const mediaAttr = getMediaAttribution(event.imageUrl, event.imageSourceNote);
 
   const handleShare = () => {
     if (navigator.clipboard) {
+      const currentHref = typeof window !== 'undefined' && isValidPublicUrl(window.location.href)
+        ? window.location.href
+        : 'Ứng dụng Bancunglehoi';
       navigator.clipboard.writeText(
-        `Lễ hội ${eventName} (${calculated.lunarStartDateText}) - Diễn ra ngày ${calculated.solarStartDate} tại ${event.locationName}, ${event.province}. Tra cứu tại bancunglehoi.ai.studio`
+        `Lễ hội ${eventName} (${calculated.lunarStartDateText}) - Diễn ra ngày ${calculated.solarStartDate} tại ${event.locationName}, ${event.province}. Nguồn: ${currentHref}`
       );
       setShowShareToast(true);
       setTimeout(() => setShowShareToast(false), 3000);
@@ -248,11 +256,40 @@ export const DetailModal: React.FC<DetailModalProps> = ({
           </div>
         </div>
 
+        {/* Media & Audio Attribution Bar (Real photography + local TTS, zero AI artifacts) */}
+        <div className="bg-stone-50 border-b border-stone-200 px-6 py-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-stone-600">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Camera className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+            <span>
+              {lang === 'vi' ? mediaAttr.captionVi : mediaAttr.captionEn}
+            </span>
+            {mediaAttr.sourceUrl && isValidPublicUrl(mediaAttr.sourceUrl) && (
+              <a
+                href={mediaAttr.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-red-800 font-bold hover:underline"
+              >
+                <span>{lang === 'vi' ? '(Xem nguồn gốc ảnh)' : '(View photo source)'}</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            )}
+          </div>
+          <div className="flex items-center gap-1 text-stone-500">
+            <Volume2 className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+            <span>
+              {lang === 'vi'
+                ? 'Âm thanh: Web Speech API cục bộ (không sao chép ghi âm bản quyền)'
+                : 'Audio: Local browser Web Speech API'}
+            </span>
+          </div>
+        </div>
+
         {/* Tab Navigation */}
-        <div className="flex border-b border-stone-200 bg-white px-6">
+        <div className="flex overflow-x-auto border-b border-stone-200 bg-white px-4 sm:px-6">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`py-3 px-4 text-xs sm:text-sm font-bold border-b-2 transition ${
+            className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition whitespace-nowrap shrink-0 ${
               activeTab === 'overview'
                 ? 'border-red-700 text-red-800'
                 : 'border-transparent text-stone-500 hover:text-stone-800'
@@ -262,7 +299,7 @@ export const DetailModal: React.FC<DetailModalProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('rituals')}
-            className={`py-3 px-4 text-xs sm:text-sm font-bold border-b-2 transition ${
+            className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition whitespace-nowrap shrink-0 ${
               activeTab === 'rituals'
                 ? 'border-red-700 text-red-800'
                 : 'border-transparent text-stone-500 hover:text-stone-800'
@@ -272,7 +309,7 @@ export const DetailModal: React.FC<DetailModalProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('legal')}
-            className={`py-3 px-4 text-xs sm:text-sm font-bold border-b-2 transition ${
+            className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition whitespace-nowrap shrink-0 ${
               activeTab === 'legal'
                 ? 'border-red-700 text-red-800'
                 : 'border-transparent text-stone-500 hover:text-stone-800'
@@ -282,13 +319,23 @@ export const DetailModal: React.FC<DetailModalProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('directions')}
-            className={`py-3 px-4 text-xs sm:text-sm font-bold border-b-2 transition ${
+            className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition whitespace-nowrap shrink-0 ${
               activeTab === 'directions'
                 ? 'border-red-700 text-red-800'
                 : 'border-transparent text-stone-500 hover:text-stone-800'
             }`}
           >
             {t.detail.directions}
+          </button>
+          <button
+            onClick={() => setActiveTab('gemini')}
+            className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition whitespace-nowrap shrink-0 ${
+              activeTab === 'gemini'
+                ? 'border-red-700 text-red-800'
+                : 'border-transparent text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            {t.detail.askGemini}
           </button>
         </div>
 
@@ -452,6 +499,10 @@ export const DetailModal: React.FC<DetailModalProps> = ({
                 </ul>
               </div>
             </div>
+          )}
+
+          {activeTab === 'gemini' && (
+            <GeminiCulturalAssistant lang={lang} festival={event} compact />
           )}
 
           {/* Quick Actions at bottom: Reminder & Export */}

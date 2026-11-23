@@ -15,6 +15,7 @@ import {
   Check,
   X,
   AlertTriangle,
+  Camera,
 } from 'lucide-react';
 import { FestivalEvent, CommunityStory, EventCategory, Region, AppLanguage } from '../types/festival';
 import { getStoredStories, updateStoryStatus } from '../data/communityData';
@@ -25,6 +26,7 @@ import {
   AdminEventDraft,
 } from '../utils/storage';
 import { getTranslation } from '../utils/i18n';
+import { getMediaAttribution, validateAdminEventSafeguards } from '../utils/mediaAttribution';
 
 interface AdminCmsViewProps {
   events: FestivalEvent[];
@@ -48,6 +50,9 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
   const [stories, setStories] = useState<CommunityStory[]>(() => getStoredStories());
   const [searchEventText, setSearchEventText] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [rejectingStoryId, setRejectingStoryId] = useState<string | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   // New Event Form State with LocalStorage Draft Persistence!
   const savedAdmin = getSavedAdminDraft();
@@ -68,6 +73,10 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
     savedAdmin.issuingAuthority || 'Bộ Văn hóa, Thể thao và Du lịch'
   );
   const [imageUrl, setImageUrl] = useState(savedAdmin.imageUrl || '');
+  const [imageSourceNote, setImageSourceNote] = useState(savedAdmin.imageSourceNote || '');
+  const [consentRealMediaAttribution, setConsentRealMediaAttribution] = useState(false);
+  const [consentCustodianNonDisclosure, setConsentCustodianNonDisclosure] = useState(false);
+  const [adminFormError, setAdminFormError] = useState('');
 
   const handleDraftUpdate = (field: keyof AdminEventDraft, val: any) => {
     if (field === 'name') setName(val);
@@ -85,6 +94,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
     if (field === 'documentNumber') setDocumentNumber(val);
     if (field === 'issuingAuthority') setIssuingAuthority(val);
     if (field === 'imageUrl') setImageUrl(val);
+    if (field === 'imageSourceNote') setImageSourceNote(val);
 
     saveAdminDraft({
       name: field === 'name' ? val : name,
@@ -102,6 +112,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
       documentNumber: field === 'documentNumber' ? val : documentNumber,
       issuingAuthority: field === 'issuingAuthority' ? val : issuingAuthority,
       imageUrl: field === 'imageUrl' ? val : imageUrl,
+      imageSourceNote: field === 'imageSourceNote' ? val : imageSourceNote,
     });
   };
 
@@ -112,31 +123,34 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
     setStories(getStoredStories());
   };
 
-  const handleRejectStory = (storyId: string) => {
-    const reason = prompt(
-      lang === 'vi'
-        ? 'Nhập lý do từ chối kiểm duyệt (ví dụ: Thiếu nguồn tài liệu xác thực):'
-        : 'Enter rejection reason:'
-    ) || 'Không phù hợp tiêu chí';
+  const handleConfirmRejectStory = (storyId: string) => {
+    const reason = rejectionReason.trim() || 'Không phù hợp tiêu chí';
     updateStoryStatus(storyId, 'rejected', reason);
     setStories(getStoredStories());
-  };
-
-  const isValidHttpUrl = (urlStr: string): boolean => {
-    try {
-      const parsed = new URL(urlStr);
-      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-    } catch {
-      return false;
-    }
+    setRejectingStoryId(null);
+    setRejectionReason('');
   };
 
   const handleCreateEvent = (e: React.FormEvent) => {
     e.preventDefault();
-    const safeImage =
-      imageUrl.trim() && isValidHttpUrl(imageUrl.trim())
-        ? imageUrl.trim()
-        : 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1200&q=80';
+    setAdminFormError('');
+
+    const validation = validateAdminEventSafeguards({
+      consentRealMediaAttribution,
+      consentCustodianNonDisclosure,
+      customImageUrl: imageUrl,
+      imageSourceNote,
+    });
+
+    if (!validation.valid) {
+      setAdminFormError(lang === 'vi' ? (validation.errorVi || '') : (validation.errorEn || ''));
+      return;
+    }
+
+    const hasCustomImage = Boolean(imageUrl.trim());
+    const safeImage = hasCustomImage
+      ? imageUrl.trim()
+      : 'https://images.pexels.com/photos/35343332/pexels-photo-35343332.jpeg?auto=compress&cs=tinysrgb&w=1200';
 
     const newEvent: FestivalEvent = {
       id: `fest-${Date.now()}`,
@@ -180,6 +194,10 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
       },
       tags: [province.trim(), ethnicGroup.trim(), category],
       imageUrl: safeImage,
+      imageSourceNote:
+        imageSourceNote.trim() ||
+        (hasCustomImage ? 'Ảnh thật có phép & ghi nguồn bởi biên tập viên' : 'Pexels #35343332 (Giấy phép Pexels)'),
+      custodianCleared: consentCustodianNonDisclosure,
       visitorAdvice: [
         'Trang phục lịch sự, trang nghiêm tại khu vực thờ tự',
         'Tuân thủ quy định bảo vệ cảnh quan và vệ sinh môi trường',
@@ -197,6 +215,9 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
     setCulturalMeaning('');
     setDocumentNumber('');
     setImageUrl('');
+    setImageSourceNote('');
+    setConsentRealMediaAttribution(false);
+    setConsentCustodianNonDisclosure(false);
   };
 
   const filteredEvents = events.filter((e) => {
@@ -224,8 +245,8 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
           </div>
           <p className="text-xs sm:text-sm text-stone-500 mt-1">
             {lang === 'vi'
-              ? 'Kiểm duyệt bài viết cộng đồng, số hóa lễ hội mới và quản lý nguồn dữ liệu chuẩn hóa'
-              : 'Moderate community submissions, digitize new festivals, and manage standardized databases'}
+              ? 'Chế độ quản trị thử nghiệm công khai (không cần đăng nhập): kiểm duyệt bài viết và số hóa lễ hội lưu cục bộ trên trình duyệt.'
+              : 'Public trial CMS (no login required): moderate submissions and digitize festivals stored locally in your browser.'}
           </p>
         </div>
 
@@ -322,7 +343,10 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                         <span>{lang === 'vi' ? 'Phê duyệt xuất bản' : 'Approve'}</span>
                       </button>
                       <button
-                        onClick={() => handleRejectStory(story.id)}
+                        onClick={() => {
+                          setRejectingStoryId(story.id);
+                          setRejectionReason('');
+                        }}
                         className="flex items-center gap-1 px-3 py-1.5 bg-red-700 hover:bg-red-800 text-white font-bold text-xs rounded-xl shadow-xs"
                       >
                         <X className="w-3.5 h-3.5" />
@@ -331,9 +355,58 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                     </div>
                   </div>
 
+                  {rejectingStoryId === story.id && (
+                    <div className="bg-red-50/70 p-3 rounded-xl border border-red-200 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                      <input
+                        type="text"
+                        value={rejectionReason}
+                        onChange={(e) => setRejectionReason(e.target.value)}
+                        placeholder={
+                          lang === 'vi'
+                            ? 'Nhập lý do từ chối (ví dụ: Thiếu nguồn xác thực)...'
+                            : 'Enter rejection reason...'
+                        }
+                        className="flex-1 text-xs bg-white border border-red-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-red-600"
+                      />
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleConfirmRejectStory(story.id)}
+                          className="px-3 py-1.5 bg-red-700 hover:bg-red-800 text-white text-xs font-bold rounded-lg"
+                        >
+                          {lang === 'vi' ? 'Xác nhận từ chối' : 'Confirm Reject'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setRejectingStoryId(null)}
+                          className="px-3 py-1.5 bg-white border border-stone-200 text-stone-600 text-xs font-bold rounded-lg"
+                        >
+                          {lang === 'vi' ? 'Hủy' : 'Cancel'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   <p className="text-xs text-stone-700 leading-relaxed bg-amber-50/40 p-3 rounded-xl border border-amber-100">
                     {story.content}
                   </p>
+                  {story.sourceReference && (
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-stone-500">
+                      <Camera className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                      <span>
+                        {lang === 'vi' ? 'Nguồn tư liệu: ' : 'Source: '}
+                        <strong>{story.sourceReference}</strong>
+                      </span>
+                      {story.images?.[0] && (
+                        <span>
+                          •{' '}
+                          {lang === 'vi'
+                            ? getMediaAttribution(story.images[0], story.sourceReference).captionVi
+                            : getMediaAttribution(story.images[0], story.sourceReference).captionEn}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -391,17 +464,33 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                   >
                     <Eye className="w-4 h-4" />
                   </button>
-                  <button
-                    onClick={() => {
-                      if (confirm(lang === 'vi' ? `Bạn có chắc muốn xóa lễ hội "${ev.name}"?` : `Delete festival "${ev.name}"?`)) {
-                        onDeleteEvent(ev.id);
-                      }
-                    }}
-                    className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg"
-                    title={lang === 'vi' ? 'Xóa lễ hội' : 'Delete'}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  {confirmDeleteId === ev.id ? (
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => {
+                          onDeleteEvent(ev.id);
+                          setConfirmDeleteId(null);
+                        }}
+                        className="px-2.5 py-1 bg-red-700 hover:bg-red-800 text-white text-[11px] font-bold rounded-lg"
+                      >
+                        {lang === 'vi' ? 'Xác nhận xóa' : 'Confirm'}
+                      </button>
+                      <button
+                        onClick={() => setConfirmDeleteId(null)}
+                        className="px-2 py-1 bg-stone-100 text-stone-600 text-[11px] font-bold rounded-lg"
+                      >
+                        {lang === 'vi' ? 'Hủy' : 'Cancel'}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmDeleteId(ev.id)}
+                      className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg"
+                      title={lang === 'vi' ? 'Xóa lễ hội' : 'Delete'}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -472,9 +561,8 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                   >
                     <option value="Bắc">Bắc</option>
                     <option value="Trung">Trung</option>
-                    <option value="Nam">Nam</option>
+                    <option value="Nam">Nam (bao gồm Tây Nam Bộ)</option>
                     <option value="Tây Nguyên">Tây Nguyên</option>
-                    <option value="Tây Nam Bộ">Tây Nam Bộ</option>
                   </select>
                 </div>
                 <div>
@@ -558,16 +646,75 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                 </div>
                 <div>
                   <label className="block text-stone-700 font-bold mb-1">
-                    {lang === 'vi' ? 'Link ảnh đại diện lễ hội' : 'Image URL'}
+                    {lang === 'vi' ? 'Link ảnh thật đại diện (tùy chọn)' : 'Real Photo URL (optional)'}
                   </label>
                   <input
                     type="url"
+                    placeholder="https://..."
                     value={imageUrl}
                     onChange={(e) => handleDraftUpdate('imageUrl', e.target.value)}
                     className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-medium"
                   />
                 </div>
               </div>
+
+              <div>
+                <label className="block text-stone-700 font-bold mb-1">
+                  {lang === 'vi'
+                    ? 'Nguồn gốc & Giấy phép ảnh thật (bắt buộc nếu nhập link ảnh riêng)'
+                    : 'Photo Attribution & License Note (required for custom photo URL)'}
+                </label>
+                <input
+                  type="text"
+                  placeholder={
+                    lang === 'vi'
+                      ? 'VD: Ảnh Pexels #35343332 / Tác giả ... đã cấp phép sử dụng'
+                      : 'e.g., Pexels #... / Photographer name & license'
+                  }
+                  value={imageSourceNote}
+                  onChange={(e) => handleDraftUpdate('imageSourceNote', e.target.value)}
+                  className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-medium"
+                />
+              </div>
+
+              <div className="bg-stone-50 border border-stone-200 rounded-2xl p-3 space-y-2">
+                <label className="flex items-start gap-2 text-[11px] text-stone-700 leading-relaxed cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={consentRealMediaAttribution}
+                    onChange={(e) => setConsentRealMediaAttribution(e.target.checked)}
+                    className="mt-0.5 rounded border-stone-300 text-red-700 focus:ring-red-600 shrink-0"
+                  />
+                  <span>
+                    {lang === 'vi'
+                      ? 'Ảnh đại diện là ảnh chụp thật có phép & ghi nguồn hợp lệ; KHÔNG dùng ảnh do AI tạo thay cho hiện vật, di tích hay nghệ nhân thật.'
+                      : 'Confirmed real permitted photo with attribution; NO AI-generated image replacing real artifacts, monuments, or artisans.'}
+                  </span>
+                </label>
+                <label className="flex items-start gap-2 text-[11px] text-stone-700 leading-relaxed cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={consentCustodianNonDisclosure}
+                    onChange={(e) => setConsentCustodianNonDisclosure(e.target.checked)}
+                    className="mt-0.5 rounded border-stone-300 text-red-700 focus:ring-red-600 shrink-0"
+                  />
+                  <span>
+                    {lang === 'vi'
+                      ? 'Đã loại trừ mọi phần tư liệu mật hoặc chi tiết mà người giữ tư liệu / nghệ nhân yêu cầu không công bố.'
+                      : 'Confirmed restricted/sacred details custodians asked not to publish have been excluded.'}
+                  </span>
+                </label>
+              </div>
+
+              {adminFormError && (
+                <div
+                  role="alert"
+                  className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-800 text-[11px] font-semibold flex items-start gap-2"
+                >
+                  <AlertTriangle className="w-4 h-4 text-red-700 shrink-0 mt-0.5" />
+                  <span>{adminFormError}</span>
+                </div>
+              )}
 
               <div className="flex justify-end gap-2 pt-3 border-t border-stone-100">
                 <button
@@ -579,7 +726,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-red-700 hover:bg-red-800 text-white font-bold rounded-xl shadow-xs"
+                  className="px-5 py-2 bg-red-700 hover:bg-red-800 text-white font-bold rounded-xl shadow-xs cursor-pointer"
                 >
                   {lang === 'vi' ? 'Lưu và số hóa vào hệ thống' : 'Save & Publish'}
                 </button>

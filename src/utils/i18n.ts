@@ -23,6 +23,10 @@ export interface TranslationDictionary {
     badge: string;
     title: string;
     subtitle: string;
+    whatDoesTitle: string;
+    whatDoesText: string;
+    whoForTitle: string;
+    whoForText: string;
     searchHint: string;
     ctaCalendar: string;
   };
@@ -65,6 +69,7 @@ export interface TranslationDictionary {
     rituals: string;
     legal: string;
     directions: string;
+    askGemini: string;
     listenAudio: string;
     stopAudio: string;
   };
@@ -100,9 +105,9 @@ export interface TranslationDictionary {
 export const TRANSLATIONS: Record<AppLanguage, TranslationDictionary> = {
   vi: {
     brandName: 'Bancunglehoi',
-    brandTagline: 'Lịch lễ hội truyền thống toàn quốc',
-    subBanner: 'Nền tảng dữ liệu Lễ hội Truyền thống & Di sản 54 Dân tộc Việt Nam',
-    subBannerMeta: 'Dữ liệu chuẩn hóa Bộ VHTTDL & Quy đổi Âm - Dương Lịch chuẩn GMT+7',
+    brandTagline: 'Tra cứu lễ hội & di sản văn hóa Việt Nam',
+    subBanner: 'Cổng tra cứu công khai Lễ hội Truyền thống & Di sản Văn hóa Việt Nam (Không cần đăng nhập)',
+    subBannerMeta: 'Tham chiếu văn bản Bộ VHTTDL & Quy đổi Âm - Dương Lịch chuẩn GMT+7',
     quickSearchPlaceholder: 'Tìm lễ hội, đền chùa, dân tộc, tỉnh thành...',
 
     nav: {
@@ -110,18 +115,24 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDictionary> = {
       calendar: 'Lịch Lễ Hội',
       map: 'Bản đồ Di sản',
       community: 'Cộng đồng',
-      legal: 'Căn cứ Pháp lý',
+      legal: 'Nguồn & Ghi nhận',
       about: 'Giới thiệu',
       admin: 'Quản trị CMS',
       searchPlaceholder: 'Tìm kiếm lễ hội, di sản...',
-      accessibility: 'Trợ năng (A11y)',
+      accessibility: 'Trợ năng',
     },
 
     hero: {
-      badge: 'Nền tảng tri thức & Lịch lễ hội quốc gia',
-      title: 'Khám phá & Trẩy hội cùng 54 Dân tộc Việt Nam',
+      badge: 'Cổng tra cứu mở • Công khai không cần đăng nhập',
+      title: 'Khám phá Lễ hội Truyền thống Các Dân tộc Việt Nam',
       subtitle:
-        'Tra cứu chuẩn xác ngày Âm - Dương các lễ hội truyền thống, sự kiện lịch sử, nghi thức và căn cứ pháp lý chính thức từ Bộ Văn hóa, Thể thao và Du lịch.',
+        'Tra cứu ngày Âm – Dương chính xác của 18 lễ hội, phong tục và sự kiện lịch sử tiêu biểu khắp Việt Nam, kèm nghi thức và căn cứ pháp lý chính thống.',
+      whatDoesTitle: 'Ứng dụng này làm gì?',
+      whatDoesText:
+        'Tra cứu lịch Âm–Dương từng năm, định vị bản đồ di sản 2025, đọc nghi thức Lễ & Hội, hỏi đáp trợ lý văn hóa và xem nguồn pháp lý.',
+      whoForTitle: 'Dành cho ai?',
+      whoForText:
+        'Người dân & du khách trẩy hội, du khách quốc tế (song ngữ Việt–Anh), người cao tuổi / khiếm thị (chữ lớn, tương phản cao, đọc to) và người tìm hiểu văn hóa.',
       searchHint: 'Nhập tên lễ hội (Hùng Vương, Gióng, Katê, Chùa Hương, Ok Om Bok...)',
       ctaCalendar: 'Xem lịch',
     },
@@ -141,8 +152,8 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDictionary> = {
       exportCSV: 'Xuất Excel (.csv)',
       gridMonthly: 'Lịch lưới theo tháng',
       timelineFullYear: 'Dòng thời gian cả năm',
-      filterAllRegions: 'Toàn quốc (3 Miền)',
-      filterAllProvinces: 'Tất cả tỉnh thành',
+      filterAllRegions: 'Toàn quốc (Các vùng miền)',
+      filterAllProvinces: 'Tất cả tỉnh/khu vực',
       filterAllCategories: 'Tất cả chủ đề',
     },
 
@@ -164,25 +175,26 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDictionary> = {
       rituals: 'Nghi thức (Lễ & Hội)',
       legal: 'Căn cứ pháp lý',
       directions: 'Đường đi & Lưu ý',
+      askGemini: 'Hỏi Gemini',
       listenAudio: 'Nghe đọc',
       stopAudio: 'Dừng đọc',
     },
 
     community: {
       title: 'Khám Phá & Đóng Góp Cộng Đồng',
-      subtitle: 'Không gian chia sẻ trải nghiệm trẩy hội, hình ảnh check-in và tư liệu lịch sử dân gian 54 dân tộc',
+      subtitle: 'Không gian mở chia sẻ trải nghiệm trẩy hội, hình ảnh và tư liệu văn hóa (công khai, không yêu cầu đăng nhập)',
       contributeBtn: 'Đóng góp câu chuyện văn hóa',
     },
 
     map: {
-      title: 'Bản Đồ Di Sản & Lễ Hội Toàn Quốc',
-      subtitle: 'Định vị các điểm di tích, gợi ý lễ hội gần vị trí người dùng nhất và hướng dẫn đường đi',
-      yourLocation: 'Vị trí của bạn:',
+      title: 'Bản Đồ Di Sản & Lễ Hội Tiêu Biểu',
+      subtitle: 'Định vị tọa độ các điểm di tích trong cơ sở dữ liệu, ước tính khoảng cách và hướng dẫn đường đi',
+      yourLocation: 'Vị trí tham chiếu:',
     },
 
     legal: {
-      title: 'Nguồn Tham Khảo & Căn Cứ Pháp Lý',
-      subtitle: 'Hệ thống văn bản quy phạm pháp luật, nghị định, thông tư của Nhà nước và Công ước quốc tế UNESCO',
+      title: 'Nguồn, Ghi Nhận & Căn Cứ Pháp Lý',
+      subtitle: 'Ghi nhận bản quyền ảnh thật, âm thanh, thuật toán, nguyên tắc tôn trọng người giữ tư liệu và văn bản pháp luật chính thống',
     },
 
     a11y: {
@@ -198,9 +210,9 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDictionary> = {
 
   en: {
     brandName: 'Bancunglehoi',
-    brandTagline: 'National Cultural Heritage & Festival Calendar',
-    subBanner: 'Platform for Traditional Festivals & Cultural Heritage of 54 Ethnic Groups of Vietnam',
-    subBannerMeta: 'Standardized by Ministry of Culture, Sports & Tourism • GMT+7 Astronomical Engine',
+    brandTagline: 'Vietnamese Cultural Heritage & Festival Portal',
+    subBanner: 'Open Public Portal for Vietnamese Traditional Festivals & Cultural Heritage (No Login Required)',
+    subBannerMeta: 'Referenced from Ministry of Culture, Sports & Tourism • GMT+7 Astronomical Engine',
     quickSearchPlaceholder: 'Search festivals, pagodas, ethnic groups, provinces...',
 
     nav: {
@@ -208,18 +220,24 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDictionary> = {
       calendar: 'Festivals Calendar',
       map: 'Heritage Map',
       community: 'Community',
-      legal: 'Legal Basis',
+      legal: 'Sources & Credits',
       about: 'About Project',
-      admin: 'CMS Admin',
+      admin: 'CMS Manager',
       searchPlaceholder: 'Search festivals, heritage...',
-      accessibility: 'Accessibility (A11y)',
+      accessibility: 'A11y',
     },
 
     hero: {
-      badge: 'National Heritage & Cultural Knowledge Portal',
-      title: 'Explore & Experience Heritage with 54 Ethnic Groups of Vietnam',
+      badge: 'Open Public Access • No Login Required',
+      title: 'Explore Traditional Festivals of Vietnam’s Ethnic Communities',
       subtitle:
-        'Accurate search for traditional festivals, historical events, rituals, and official legal bases certified by the Ministry of Culture, Sports and Tourism.',
+        'Look up accurate Lunar–Solar dates for 18 digitized traditional festivals, customs, and historical events across Vietnam, with rituals and official legal references.',
+      whatDoesTitle: 'What this app does',
+      whatDoesText:
+        'Converts Lunar–Solar dates, locates 2025 heritage provinces on an interactive map, explains rituals, answers cultural questions, and cites legal sources.',
+      whoForTitle: 'Who it is for',
+      whoForText:
+        'Festival-goers & travelers, international visitors (VI/EN bilingual), elderly or low-vision readers (large text, high contrast, voice reader), and students.',
       searchHint: 'Enter festival name (Hung King, Giong, Kate, Huong Pagoda, Ok Om Bok...)',
       ctaCalendar: 'View Calendar',
     },
@@ -239,8 +257,8 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDictionary> = {
       exportCSV: 'Export Excel (.csv)',
       gridMonthly: 'Monthly Grid',
       timelineFullYear: 'Annual Timeline',
-      filterAllRegions: 'All Regions (North, Central, South)',
-      filterAllProvinces: 'All Provinces',
+      filterAllRegions: 'All Regions',
+      filterAllProvinces: 'All Provinces / Areas',
       filterAllCategories: 'All Categories',
     },
 
@@ -262,25 +280,26 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDictionary> = {
       rituals: 'Rituals & Festivities',
       legal: 'Legal Basis',
       directions: 'Directions & Tips',
+      askGemini: 'Ask Gemini',
       listenAudio: 'Listen',
       stopAudio: 'Stop',
     },
 
     community: {
       title: 'Community Stories & Contributions',
-      subtitle: 'A collaborative space sharing travelogues, photos, and folk historical records of 54 ethnic groups',
+      subtitle: 'Open collaborative space for sharing festival experiences and cultural notes (public access, no login needed)',
       contributeBtn: 'Share Cultural Story',
     },
 
     map: {
-      title: 'National Heritage & Festival Map',
-      subtitle: 'Locate heritage sites, discover nearest festivals, and find verified travel routes',
-      yourLocation: 'Your Location:',
+      title: 'Interactive Heritage & Festival Map',
+      subtitle: 'Locate digitized heritage sites, estimate distances from reference cities, and view travel routes',
+      yourLocation: 'Reference City:',
     },
 
     legal: {
-      title: 'Legal References & Regulatory Framework',
-      subtitle: 'State legislative laws, governmental decrees, circulars, and UNESCO Conventions',
+      title: 'Sources, Attribution & Legal Basis',
+      subtitle: 'Credits for licensed real photography, browser audio synthesis, calendar algorithms, custodian safeguards, and official legal documents',
     },
 
     a11y: {

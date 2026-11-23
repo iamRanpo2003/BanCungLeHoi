@@ -12,6 +12,9 @@ import {
   Info,
   Volume2,
   VolumeX,
+  ShieldCheck,
+  Camera,
+  BookOpen,
 } from 'lucide-react';
 import { FestivalEvent, EventCategory, AppLanguage, AccessibilitySettings } from '../types/festival';
 import { solarToLunar, getHoangDaoHours } from '../utils/lunarCalendar';
@@ -19,6 +22,8 @@ import { calculateAllEventsForYear } from '../utils/festivalCalculator';
 import { LEGAL_DISCLAIMER } from '../data/legalReferences';
 import { getTranslation } from '../utils/i18n';
 import { tts } from '../utils/textToSpeech';
+import { getMediaAttribution } from '../utils/mediaAttribution';
+import { GeminiCulturalAssistant } from './GeminiCulturalAssistant';
 
 interface HomeViewProps {
   events: FestivalEvent[];
@@ -123,7 +128,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
     {
       category: 'Phong tục',
       title: lang === 'vi' ? 'Phong tục Tập quán' : 'Customs & Traditions',
-      desc: lang === 'vi' ? 'Tín ngưỡng và bản sắc văn hóa 54 dân tộc' : 'Spiritual beliefs and folk rituals of 54 ethnic groups',
+      desc: lang === 'vi' ? 'Tín ngưỡng và bản sắc văn hóa các dân tộc Việt Nam' : 'Spiritual beliefs and folk rituals of Vietnam’s ethnic communities',
       icon: Compass,
       color: 'text-emerald-800',
       bg: 'bg-emerald-50/70 border-emerald-200 hover:border-emerald-400',
@@ -159,38 +164,46 @@ export const HomeView: React.FC<HomeViewProps> = ({
   return (
     <div className="space-y-10 pb-12">
       {/* Hero Section with Heritage Aesthetics */}
-      <section className="relative overflow-hidden rounded-3xl heritage-gradient-bar text-amber-50 p-6 sm:p-10 lg:p-12 shadow-xl border border-amber-600/40">
-        <div className="relative z-10 max-w-3xl space-y-4">
+      <section className="relative overflow-hidden rounded-3xl heritage-gradient-bar text-amber-50 p-6 sm:p-10 lg:p-11 shadow-xl border border-amber-600/40">
+        <div className="relative z-10 max-w-4xl space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-200 text-xs font-semibold backdrop-blur-md">
             <Sparkles className="w-3.5 h-3.5 text-amber-300" />
             <span>{t.hero.badge}</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight font-serif">
-            {lang === 'vi' ? (
-              <>
-                Khám phá & Trẩy hội cùng <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-100 to-yellow-300">
-                  54 Dân tộc Việt Nam
-                </span>
-              </>
-            ) : (
-              <>
-                Explore & Experience Heritage with <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-100 to-yellow-300">
-                  54 Ethnic Groups of Vietnam
-                </span>
-              </>
-            )}
+            {t.hero.title}
           </h1>
 
-          <p className="text-sm sm:text-base text-amber-100/90 font-normal leading-relaxed">
+          <p className="text-sm sm:text-base text-amber-100/90 font-normal leading-relaxed max-w-3xl">
             {t.hero.subtitle}
           </p>
 
+          {/* Immediate Newcomer Orientation: What it does & Who it is for */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div className="bg-stone-950/35 border border-amber-400/25 rounded-2xl p-3.5 backdrop-blur-xs">
+              <div className="text-[11px] font-extrabold uppercase tracking-wider text-amber-300 mb-1 flex items-center gap-1.5">
+                <Compass className="w-3.5 h-3.5" />
+                <span>{t.hero.whatDoesTitle}</span>
+              </div>
+              <p className="text-xs text-amber-50/95 leading-relaxed">
+                {t.hero.whatDoesText}
+              </p>
+            </div>
+            <div className="bg-stone-950/35 border border-amber-400/25 rounded-2xl p-3.5 backdrop-blur-xs">
+              <div className="text-[11px] font-extrabold uppercase tracking-wider text-amber-300 mb-1 flex items-center gap-1.5">
+                <Award className="w-3.5 h-3.5" />
+                <span>{t.hero.whoForTitle}</span>
+              </div>
+              <p className="text-xs text-amber-50/95 leading-relaxed">
+                {t.hero.whoForText}
+              </p>
+            </div>
+          </div>
+
           {/* Quick Search in Hero */}
-          <div className="pt-2">
-            <div className="relative max-w-xl">
+          <div className="pt-1 flex flex-col sm:flex-row sm:items-center gap-2.5">
+            <div className="relative flex-1 max-w-xl">
               <Search className="w-5 h-5 text-amber-700 absolute left-4 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
@@ -206,6 +219,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 {t.hero.ctaCalendar}
               </button>
             </div>
+            <button
+              onClick={() => onNavigateTab('legal')}
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-300/40 text-amber-100 text-xs font-bold transition cursor-pointer shrink-0"
+            >
+              <BookOpen className="w-4 h-4 text-amber-300" />
+              <span>{t.nav.legal}</span>
+            </button>
           </div>
         </div>
 
@@ -302,6 +322,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   <Award className="w-3.5 h-3.5" /> UNESCO
                 </div>
               )}
+              <div className="absolute bottom-2.5 right-2.5 bg-stone-950/75 text-amber-100 text-[10px] font-semibold px-2 py-0.5 rounded-md backdrop-blur-xs flex items-center gap-1">
+                <Camera className="w-3 h-3 text-amber-300" />
+                <span>
+                  {lang === 'vi'
+                    ? getMediaAttribution(spotlightEvent.event.imageUrl, spotlightEvent.event.imageSourceNote).captionVi
+                    : getMediaAttribution(spotlightEvent.event.imageUrl, spotlightEvent.event.imageSourceNote).captionEn}
+                </span>
+              </div>
             </div>
 
             <div className="w-full md:w-3/5 space-y-3">
@@ -397,8 +425,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickCategories.map((c) => {
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {quickCategories
+            .filter((c) => c.count > 0)
+            .map((c) => {
             const Icon = c.icon;
             return (
               <div
@@ -433,7 +463,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-black text-stone-900 font-serif">
-              {lang === 'vi' ? 'Lễ Hội Tiêu Biểu Toàn Quốc' : 'National Highlights'}
+              {lang === 'vi' ? 'Lễ Hội & Sự Kiện Tiêu Biểu Đã Số Hóa' : 'Featured Digitized Festivals & Events'}
             </h2>
             <p className="text-xs text-stone-500">
               {lang === 'vi'
@@ -458,6 +488,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     <img
                       src={item.event.imageUrl}
                       alt={festName}
+                      loading="lazy"
                       className="w-full h-full object-cover hover:scale-105 transition duration-300"
                     />
                     <div className="absolute top-2.5 left-2.5 bg-red-700 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-xs">
@@ -485,6 +516,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
                     <p className="text-xs text-stone-600 line-clamp-2 leading-relaxed">
                       {festOrigin}
+                    </p>
+                    <p className="text-[10px] text-stone-500 flex items-center gap-1 pt-0.5">
+                      <Camera className="w-3 h-3 text-amber-700 shrink-0" />
+                      <span className="truncate">
+                        {lang === 'vi'
+                          ? getMediaAttribution(item.event.imageUrl, item.event.imageSourceNote).captionVi
+                          : getMediaAttribution(item.event.imageUrl, item.event.imageSourceNote).captionEn}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -518,6 +557,65 @@ export const HomeView: React.FC<HomeViewProps> = ({
             );
           })}
         </div>
+      </section>
+
+      {/* Gemini Cultural Assistant Section */}
+      <GeminiCulturalAssistant lang={lang} />
+
+      {/* Truthful Data & Beneficiary Transparency Section */}
+      <section className="bg-white rounded-3xl p-6 sm:p-7 border border-stone-200 shadow-xs space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 pb-3">
+          <div className="flex items-center gap-2 text-red-800 font-bold text-sm">
+            <ShieldCheck className="w-5 h-5" />
+            <h2 className="font-serif text-base sm:text-lg font-black text-stone-900">
+              {lang === 'vi'
+                ? 'Số liệu Dữ liệu Thực tế & Minh bạch Người thụ hưởng'
+                : 'Verified Dataset Scope & Beneficiary Transparency'}
+            </h2>
+          </div>
+          <span className="text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full">
+            {lang === 'vi' ? 'Mở công khai • Không cần đăng nhập' : 'Public Open Access • No Login'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-center">
+          <div className="bg-amber-50/60 border border-amber-200 rounded-2xl p-3.5">
+            <div className="text-2xl font-black text-red-800 font-serif">{events.length}</div>
+            <div className="text-xs font-semibold text-stone-700 mt-0.5">
+              {lang === 'vi' ? 'Sự kiện đã số hóa' : 'Digitized Events'}
+            </div>
+          </div>
+          <div className="bg-amber-50/60 border border-amber-200 rounded-2xl p-3.5">
+            <div className="text-2xl font-black text-red-800 font-serif">
+              {new Set(events.map((e) => e.province)).size}
+            </div>
+            <div className="text-xs font-semibold text-stone-700 mt-0.5">
+              {lang === 'vi' ? 'Tỉnh / khu vực có dữ liệu' : 'Provinces / Areas Covered'}
+            </div>
+          </div>
+          <div className="bg-amber-50/60 border border-amber-200 rounded-2xl p-3.5">
+            <div className="text-2xl font-black text-red-800 font-serif">
+              {events.filter((e) => e.unescoRecognized).length}
+            </div>
+            <div className="text-xs font-semibold text-stone-700 mt-0.5">
+              {lang === 'vi' ? 'Di sản ghi danh UNESCO' : 'UNESCO-listed Items'}
+            </div>
+          </div>
+          <div className="bg-stone-50 border border-stone-200 rounded-2xl p-3.5">
+            <div className="text-2xl font-black text-stone-900 font-serif">
+              {lang === 'vi' ? 'Thử nghiệm' : 'Pilot'}
+            </div>
+            <div className="text-xs font-semibold text-stone-700 mt-0.5">
+              {lang === 'vi' ? 'Chưa đo lường người thụ hưởng' : 'No external user tally'}
+            </div>
+          </div>
+        </div>
+
+        <p className="text-xs text-stone-600 leading-relaxed bg-stone-50 p-3.5 rounded-2xl border border-stone-200">
+          {lang === 'vi'
+            ? 'Cam kết minh bạch thông tin: Toàn bộ số liệu hiển thị phía trên được tính trực tiếp từ bộ dữ liệu hiện có trong ứng dụng. Đây là sản phẩm thực tập học thuật phát hành mở hoàn toàn miễn phí, không thu thập dữ liệu người dùng và chưa triển khai đo lường số người thụ hưởng thực tế bên ngoài (không khai báo số lượng người dùng phóng đại).'
+            : 'Transparency Disclosure: All metrics above are computed directly from the current dataset in the application. This is a free, open academic internship pilot that does not collect user accounts or report unverified external beneficiary counts.'}
+        </p>
       </section>
 
       {/* Mandatory Legal Disclaimer Banner at Bottom */}

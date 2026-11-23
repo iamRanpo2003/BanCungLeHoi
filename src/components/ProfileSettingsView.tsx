@@ -19,6 +19,7 @@ import { calculateAllEventsForYear } from '../utils/festivalCalculator';
 import { exportToICS, exportToCSV, exportToJSON } from '../utils/dataExporter';
 import { LEGAL_DISCLAIMER } from '../data/legalReferences';
 import { getTranslation } from '../utils/i18n';
+import { clearPersonalProfileData } from '../utils/userStore';
 
 interface ProfileSettingsViewProps {
   user: UserProfile;
@@ -46,6 +47,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
   const [email, setEmail] = useState(user.email);
   const [phone, setPhone] = useState(user.phone || '');
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [clearedSuccess, setClearedSuccess] = useState(false);
 
   const bookmarkedEvents = events.filter((e) => user.bookmarks.includes(e.id));
   const allCalculated = calculateAllEventsForYear(events, targetYear);
@@ -54,12 +56,24 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
     e.preventDefault();
     onUpdateUser({
       ...user,
-      fullName: fullName.trim() || 'Người yêu văn hóa',
+      fullName: fullName.trim() || 'Khách tham quan',
       email: email.trim(),
       phone: phone.trim(),
     });
     setSavedSuccess(true);
+    setClearedSuccess(false);
     setTimeout(() => setSavedSuccess(false), 2500);
+  };
+
+  const handleClearPersonalData = () => {
+    const cleaned = clearPersonalProfileData();
+    setFullName(cleaned.fullName);
+    setEmail('');
+    setPhone('');
+    onUpdateUser(cleaned);
+    setClearedSuccess(true);
+    setSavedSuccess(false);
+    setTimeout(() => setClearedSuccess(false), 3000);
   };
 
   return (
@@ -71,18 +85,17 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
         </div>
         <div className="flex-1 text-center sm:text-left space-y-1">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-            <h1 className="text-2xl font-black font-serif">{user.fullName || (lang === 'vi' ? 'Người Dùng' : 'User')}</h1>
-            <span
-              className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
-                user.role === 'admin'
-                  ? 'bg-amber-400 text-stone-950 font-black'
-                  : 'bg-emerald-400 text-stone-950 font-bold'
-              }`}
-            >
-              {user.role === 'admin' ? (lang === 'vi' ? 'Quản Trị Viên (Admin CMS)' : 'Administrator (CMS)') : (lang === 'vi' ? 'Độc Giả Di Sản' : 'Heritage Reader')}
+            <h1 className="text-2xl font-black font-serif">{user.fullName || (lang === 'vi' ? 'Khách tham quan' : 'Visitor')}</h1>
+            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-400 text-stone-950">
+              {lang === 'vi' ? 'Truy cập công khai • Không cần đăng nhập' : 'Open Access • No Login Needed'}
             </span>
           </div>
-          <p className="text-xs text-amber-200">{user.email} • {user.phone || '0987xxxxxx'}</p>
+          <p className="text-xs text-amber-200">
+            {[user.email, user.phone].filter(Boolean).join(' • ') ||
+              (lang === 'vi'
+                ? 'Hồ sơ lưu cục bộ trên trình duyệt của bạn'
+                : 'Preferences saved locally in your browser')}
+          </p>
           <div className="flex flex-wrap gap-1.5 pt-2 justify-center sm:justify-start">
             {user.interests.map((i) => (
               <span
@@ -106,58 +119,91 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
               <span>{lang === 'vi' ? 'Cập Nhật Thông Tin Cá Nhân' : 'Personal Profile Settings'}</span>
             </h2>
 
+            <div className="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200 text-xs text-amber-950 leading-relaxed flex items-start gap-2">
+              <Shield className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+              <div>
+                <strong className="block font-bold text-amber-900 mb-0.5">
+                  {lang === 'vi'
+                    ? 'Mục đích thu thập & Lưu trữ cục bộ (Tự nguyện):'
+                    : 'Purpose & Local-Only Storage Disclosure:'}
+                </strong>
+                <span>
+                  {lang === 'vi'
+                    ? 'Các trường dưới đây hoàn toàn không bắt buộc. Tên hiển thị chỉ dùng để điền sẵn tên tác giả khi bạn gửi câu chuyện văn hóa; Email/SĐT (nếu nhập) chỉ lưu trên trình duyệt của bạn, không gửi về máy chủ và không dùng để quảng cáo hay định danh.'
+                    : 'All fields below are optional. Your display name prefills author attribution when submitting local stories; optional email/phone stay strictly in your browser storage, are never sent to any server, and are never used for tracking.'}
+                </span>
+              </div>
+            </div>
+
             {savedSuccess && (
               <div className="p-3 bg-emerald-50 text-emerald-800 text-xs rounded-xl border border-emerald-200 flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-600" />
-                <span>{lang === 'vi' ? 'Đã lưu thông tin cá nhân thành công!' : 'Profile updated successfully!'}</span>
+                <span>{lang === 'vi' ? 'Đã lưu thông tin cá nhân cục bộ!' : 'Preferences saved locally!'}</span>
+              </div>
+            )}
+
+            {clearedSuccess && (
+              <div className="p-3 bg-stone-100 text-stone-800 text-xs rounded-xl border border-stone-300 flex items-center gap-2">
+                <Check className="w-4 h-4 text-stone-700" />
+                <span>{lang === 'vi' ? 'Đã xóa toàn bộ thông tin cá nhân khỏi trình duyệt.' : 'Cleared personal profile data from browser storage.'}</span>
               </div>
             )}
 
             <form onSubmit={handleSaveProfile} className="space-y-3.5">
               <div>
                 <label className="block text-xs font-bold text-stone-700 uppercase mb-1">
-                  {lang === 'vi' ? 'Họ và tên' : 'Full Name'}
+                  {lang === 'vi' ? 'Tên hiển thị (tùy chọn)' : 'Display Name (optional)'}
                 </label>
                 <input
                   type="text"
-                  required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
+                  placeholder={lang === 'vi' ? 'Khách tham quan' : 'Visitor'}
                   className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-red-600 font-medium"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-stone-700 uppercase mb-1">
-                  {lang === 'vi' ? 'Địa chỉ Email' : 'Email Address'}
+                  {lang === 'vi' ? 'Địa chỉ Email (tùy chọn)' : 'Email Address (optional)'}
                 </label>
                 <input
                   type="email"
-                  required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  placeholder={lang === 'vi' ? 'Không bắt buộc' : 'Optional'}
                   className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-red-600 font-medium"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-stone-700 uppercase mb-1">
-                  {lang === 'vi' ? 'Số điện thoại' : 'Phone Number'}
+                  {lang === 'vi' ? 'Số điện thoại (tùy chọn)' : 'Phone Number (optional)'}
                 </label>
                 <input
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  placeholder={lang === 'vi' ? 'Không bắt buộc' : 'Optional'}
                   className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-red-600 font-medium"
                 />
               </div>
 
-              <button
-                type="submit"
-                className="w-full py-2.5 bg-red-700 hover:bg-red-800 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer"
-              >
-                {lang === 'vi' ? 'Lưu thay đổi hồ sơ' : 'Save Changes'}
-              </button>
+              <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 bg-red-700 hover:bg-red-800 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer"
+                >
+                  {lang === 'vi' ? 'Lưu thay đổi cục bộ' : 'Save Locally'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClearPersonalData}
+                  className="px-3.5 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl border border-stone-200 transition cursor-pointer"
+                >
+                  {lang === 'vi' ? 'Xóa dữ liệu cá nhân' : 'Clear Personal Data'}
+                </button>
+              </div>
             </form>
           </div>
 

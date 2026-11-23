@@ -36,7 +36,7 @@ export interface FestivalEvent {
   category: EventCategory;
   ethnicGroup: string; // Dân tộc (Kinh, H'Mông, Tày, Thái, Chăm, Khmer, Ba Na, Gia Rai...)
   region: Region;
-  province: string; // 63 tỉnh thành
+  province: string; // 34 tỉnh, thành phố sau sắp xếp năm 2025 (kèm tên cũ nếu sáp nhập)
   district?: string;
   locationName: string; // Tên di tích, đền, chùa, địa danh diễn ra
   coordinates: {
@@ -72,6 +72,8 @@ export interface FestivalEvent {
   directionsGuide: string; // Hướng dẫn đường đi, giao thông
   visitorAdvice: string[]; // Lưu ý cho du khách trẩy hội (trang phục, nếp sống văn minh...)
   imageUrl: string;
+  imageSourceNote?: string;
+  custodianCleared?: boolean;
   unescoRecognized?: boolean;
   nationalHeritage?: boolean;
   tags: string[];
@@ -107,6 +109,11 @@ export interface CommunityStory {
   likes: number;
   tags: string[];
   sourceReference?: string;
+  mediaLicenseConfirmed?: boolean;
+  restrictedContentExcluded?: boolean;
+  privacyConsentConfirmed?: boolean;
+  postAnonymously?: boolean;
+  isSample?: boolean;
 }
 
 export interface LegalDocument {
