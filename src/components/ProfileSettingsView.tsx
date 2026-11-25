@@ -90,7 +90,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
               {lang === 'vi' ? 'Truy cập công khai • Không cần đăng nhập' : 'Open Access • No Login Needed'}
             </span>
           </div>
-          <p className="text-xs text-amber-200">
+          <p className="text-base text-amber-100">
             {[user.email, user.phone].filter(Boolean).join(' • ') ||
               (lang === 'vi'
                 ? 'Hồ sơ lưu cục bộ trên trình duyệt của bạn'
@@ -159,7 +159,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder={lang === 'vi' ? 'Khách tham quan' : 'Visitor'}
-                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-red-600 font-medium"
+                  className="w-full min-h-[44px] text-base px-3.5 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-red-600 font-medium"
                 />
               </div>
 
@@ -172,7 +172,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={lang === 'vi' ? 'Không bắt buộc' : 'Optional'}
-                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-red-600 font-medium"
+                  className="w-full min-h-[44px] text-base px-3.5 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-red-600 font-medium"
                 />
               </div>
 
@@ -185,21 +185,21 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder={lang === 'vi' ? 'Không bắt buộc' : 'Optional'}
-                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-red-600 font-medium"
+                  className="w-full min-h-[44px] text-base px-3.5 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-red-600 font-medium"
                 />
               </div>
 
               <div className="flex flex-col sm:flex-row gap-2 pt-1">
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 bg-red-700 hover:bg-red-800 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer"
+                  className="flex-1 min-h-[44px] py-2.5 px-4 bg-red-700 hover:bg-red-800 text-white font-bold text-sm sm:text-base rounded-xl shadow-xs transition cursor-pointer"
                 >
                   {lang === 'vi' ? 'Lưu thay đổi cục bộ' : 'Save Locally'}
                 </button>
                 <button
                   type="button"
                   onClick={handleClearPersonalData}
-                  className="px-3.5 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl border border-stone-200 transition cursor-pointer"
+                  className="min-h-[44px] px-3.5 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-sm sm:text-base rounded-xl border border-stone-200 transition cursor-pointer"
                 >
                   {lang === 'vi' ? 'Xóa dữ liệu cá nhân' : 'Clear Personal Data'}
                 </button>
@@ -213,31 +213,31 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
               <Download className="w-4 h-4 text-red-700" />
               <span>{lang === 'vi' ? 'Xuất Dữ Liệu Lễ Hội' : 'Export Festival Data'}</span>
             </h3>
-            <p className="text-xs text-stone-500">
+            <p className="text-base text-stone-600">
               {lang === 'vi' ? 'Tải về lịch lễ hội chuẩn năm ' : 'Download standardized festival calendar for year '}
               {targetYear}:
             </p>
             <div className="grid grid-cols-3 gap-2 pt-1">
               <button
                 onClick={() => exportToICS(allCalculated)}
-                className="p-2.5 rounded-xl bg-stone-50 hover:bg-amber-50 border border-stone-200 text-center transition"
+                className="min-h-[44px] p-2.5 rounded-xl bg-stone-50 hover:bg-amber-50 border border-stone-200 text-center transition"
               >
                 <Calendar className="w-4 h-4 mx-auto text-red-700 mb-1" />
-                <span className="block text-[11px] font-bold text-stone-800">iCal (.ics)</span>
+                <span className="block text-xs font-bold text-stone-800">iCal (.ics)</span>
               </button>
               <button
                 onClick={() => exportToCSV(allCalculated)}
-                className="p-2.5 rounded-xl bg-stone-50 hover:bg-amber-50 border border-stone-200 text-center transition"
+                className="min-h-[44px] p-2.5 rounded-xl bg-stone-50 hover:bg-amber-50 border border-stone-200 text-center transition"
               >
                 <FileSpreadsheet className="w-4 h-4 mx-auto text-emerald-700 mb-1" />
-                <span className="block text-[11px] font-bold text-stone-800">Excel (.csv)</span>
+                <span className="block text-xs font-bold text-stone-800">Excel (.csv)</span>
               </button>
               <button
                 onClick={() => exportToJSON(allCalculated)}
-                className="p-2.5 rounded-xl bg-stone-50 hover:bg-amber-50 border border-stone-200 text-center transition"
+                className="min-h-[44px] p-2.5 rounded-xl bg-stone-50 hover:bg-amber-50 border border-stone-200 text-center transition"
               >
                 <FileCode className="w-4 h-4 mx-auto text-amber-700 mb-1" />
-                <span className="block text-[11px] font-bold text-stone-800">JSON API</span>
+                <span className="block text-xs font-bold text-stone-800">JSON API</span>
               </button>
             </div>
           </div>
@@ -261,7 +261,7 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
             {bookmarkedEvents.length === 0 ? (
               <div className="p-8 text-center text-stone-400 space-y-2">
                 <Bookmark className="w-8 h-8 mx-auto text-stone-300" />
-                <p className="text-xs">
+                <p className="text-base text-stone-600">
                   {lang === 'vi'
                     ? 'Bạn chưa lưu lễ hội nào. Hãy bấm biểu tượng Bookmark trên các thẻ lễ hội để lưu lại.'
                     : 'No saved festivals yet. Click the bookmark icon on any festival card to save it.'}
@@ -274,36 +274,37 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
                   return (
                     <div
                       key={ev.id}
-                      className="py-3.5 flex items-center justify-between gap-4 hover:bg-amber-50/40 px-2 rounded-xl transition"
+                      className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-amber-50/40 px-2 rounded-xl transition"
                     >
                       <div
                         onClick={() => onSelectEvent(ev)}
-                        className="cursor-pointer space-y-0.5 flex-1"
+                        className="cursor-pointer space-y-0.5 flex-1 min-w-0"
                       >
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-extrabold text-sm text-stone-900 hover:text-red-700 font-serif">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h4 className="font-extrabold text-base text-stone-900 hover:text-red-700 font-serif">
                             {evName}
                           </h4>
-                          <span className="text-[10px] bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded">
+                          <span className="text-xs bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded">
                             {ev.category}
                           </span>
                         </div>
-                        <p className="text-xs text-stone-500">
+                        <p className="text-base text-stone-600">
                           {ev.province} • Dân tộc {ev.ethnicGroup} • {ev.locationName}
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 shrink-0">
                         <button
                           onClick={() => onRemoveBookmark(ev.id)}
-                          className="p-1.5 text-stone-400 hover:text-red-600 rounded-lg transition"
+                          className="min-w-[44px] min-h-[44px] flex items-center justify-center text-stone-500 hover:text-red-600 rounded-lg border border-stone-200 sm:border-0 transition"
                           title={lang === 'vi' ? 'Bỏ lưu' : 'Remove bookmark'}
+                          aria-label={lang === 'vi' ? 'Bỏ lưu' : 'Remove bookmark'}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => onSelectEvent(ev)}
-                          className="px-3 py-1 bg-red-700 hover:bg-red-800 text-white font-bold text-xs rounded-lg transition"
+                          className="min-h-[44px] px-4 py-2 bg-red-700 hover:bg-red-800 text-white font-bold text-sm rounded-lg transition"
                         >
                           {lang === 'vi' ? 'Xem' : 'View'}
                         </button>
@@ -318,13 +319,13 @@ export const ProfileSettingsView: React.FC<ProfileSettingsViewProps> = ({
       </div>
 
       {/* Mandatory Disclaimer */}
-      <div className="bg-amber-50/90 border-2 border-amber-300 rounded-3xl p-5 text-amber-950 text-xs sm:text-sm leading-relaxed flex items-start gap-3">
+      <div className="bg-amber-50/90 border-2 border-amber-300 rounded-3xl p-5 text-amber-950 text-base leading-relaxed flex items-start gap-3">
         <Info className="w-6 h-6 text-amber-700 shrink-0 mt-0.5" />
         <div>
           <h2 className="font-extrabold text-sm text-amber-900 uppercase tracking-wider mb-1">
             {lang === 'vi' ? 'Khuyến cáo pháp lý bắt buộc:' : 'Mandatory Legal Notice:'}
           </h2>
-          <p>{LEGAL_DISCLAIMER}</p>
+          <p className="text-base">{LEGAL_DISCLAIMER}</p>
         </div>
       </div>
     </div>

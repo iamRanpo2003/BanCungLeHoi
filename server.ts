@@ -2,7 +2,13 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, Type } from '@google/genai';
+import {
+  buildGroundedAppContext,
+  normalizeGroundedGeminiPayload,
+  NO_INFO_VI,
+  type GroundedFestivalInput,
+} from './src/utils/geminiGrounding.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,7 +27,13 @@ interface CulturalGuideRequest {
     timingNote?: unknown;
     historicalOrigin?: unknown;
     culturalMeaning?: unknown;
+    mainRitualsLe?: unknown;
+    mainRitualsHoi?: unknown;
+    directionsGuide?: unknown;
+    visitorAdvice?: unknown;
     legalDocument?: unknown;
+    issuingAuthority?: unknown;
+    issueDate?: unknown;
   };
 }
 
@@ -30,11 +42,20 @@ function cleanText(value: unknown, maxLen: number): string {
   return value.replace(/\s+/g, ' ').trim().slice(0, maxLen);
 }
 
+function cleanStringArray(value: unknown, maxItems: number, maxLen: number): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is string => typeof item === 'string')
+    .map((item) => cleanText(item, maxLen))
+    .filter(Boolean)
+    .slice(0, maxItems);
+}
+
 export function createApp() {
   const app = express();
 
   app.disable('x-powered-by');
-  app.use(express.json({ limit: '16kb' }));
+  app.use(express.json({ limit: '24kb' }));
 
   app.use((_req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -65,13 +86,14 @@ export function createApp() {
       return;
     }
 
+    // Read API key strictly from server environment variable; never expose or log it.
     const apiKey = process.env.GEMINI_API_KEY?.trim();
     if (!apiKey || apiKey === 'undefined' || apiKey === 'null') {
       res.status(503).json({
         error:
           lang === 'vi'
-            ? 'Chức năng hỏi đáp Gemini chưa được cấu hình khóa API trên máy chủ (GEMINI_API_KEY). Bạn vẫn có thể tra cứu đầy đủ toàn bộ dữ liệu lễ hội đã biên tập trên cổng thông tin.'
-            : 'Gemini Q&A is not configured on the server (missing GEMINI_API_KEY). All curated festival records remain fully accessible.',
+            ? 'Chức năng hỏi đáp Gemini chưa được cấu hình khóa API trên máy chủ (GEMINI_API_KEY). Bạn vẫn có thể tra cứu đầy đủ dữ liệu lễ hội trên ứng dụng.'
+            : 'Gemini Q&A is not configured on the server (missing GEMINI_API_KEY). All curated festival records remain accessible.',
         code: 'GEMINI_NOT_CONFIGURED',
       });
       return;
@@ -79,54 +101,53 @@ export function createApp() {
 
     const festival = body.festival;
     const festName = cleanText(festival?.name, 160);
-    const festProvince = cleanText(festival?.province, 160);
-    const festEthnic = cleanText(festival?.ethnicGroup, 100);
-    const festTiming = cleanText(festival?.timingNote, 200);
-    const festOrigin = cleanText(festival?.historicalOrigin, 500);
-    const festMeaning = cleanText(festival?.culturalMeaning, 500);
-    const festLegal = cleanText(festival?.legalDocument, 200);
+    const activeFestival: GroundedFestivalInput | undefined = festName
+      ? {
+          id: cleanText(festival?.id, 100),
+          name: festName,
+          province: cleanText(festival?.province, 160),
+          ethnicGroup: cleanText(festival?.ethnicGroup, 100),
+          timingNote: cleanText(festival?.timingNote, 200),
+          historicalOrigin: cleanText(festival?.historicalOrigin, 600),
+          culturalMeaning: cleanText(festival?.culturalMeaning, 600),
+          mainRitualsLe: cleanStringArray(festival?.mainRitualsLe, 8, 220),
+          mainRitualsHoi: cleanStringArray(festival?.mainRitualsHoi, 8, 220),
+          directionsGuide: cleanText(festival?.directionsGuide, 400),
+          visitorAdvice: cleanStringArray(festival?.visitorAdvice, 6, 220),
+          legalDocument: cleanText(festival?.legalDocument, 200),
+          issuingAuthority: cleanText(festival?.issuingAuthority, 200),
+          issueDate: cleanText(festival?.issueDate, 80),
+        }
+      : undefined;
 
-    const hasFestivalContext = Boolean(festName);
+    const groundedContext = buildGroundedAppContext(activeFestival);
 
-    const contextBlock = hasFestivalContext
-      ? [
-          `Hồ sơ di sản đã rà soát trong Cổng Bancunglehoi:`,
-          `- Tên sự kiện: ${festName}`,
-          festProvince ? `- Địa danh (cập nhật sắp xếp hành chính 2025): ${festProvince}` : '',
-          festEthnic ? `- Cộng đồng dân tộc: ${festEthnic}` : '',
-          festTiming ? `- Thời gian: ${festTiming}` : '',
-          festOrigin ? `- Nguồn gốc lịch sử: ${festOrigin}` : '',
-          festMeaning ? `- Ý nghĩa văn hóa: ${festMeaning}` : '',
-          festLegal ? `- Căn cứ văn bản tham chiếu: ${festLegal}` : '',
-        ]
-          .filter(Boolean)
-          .join('\n')
-      : 'Người dùng đang hỏi chung về lễ hội truyền thống, phong tục, di sản văn hóa hoặc quy tắc ứng xử văn minh tại Việt Nam (theo Nghị quyết 202/2025/QH15 về sắp xếp đơn vị hành chính cấp tỉnh và bỏ cấp huyện nếu nhắc tới địa danh năm 2025).';
-
-    const prompt =
+    const systemInstruction =
       lang === 'vi'
-        ? `Bạn là trợ lý biên tập văn hóa Việt Nam của cổng tra cứu mở Bancunglehoi. Hãy trả lời câu hỏi của người dùng một cách chuẩn mực, chính xác, tôn trọng lịch sử và bản sắc dân tộc Việt Nam.
+        ? [
+            'Bạn là trợ lý tra cứu dữ liệu nội bộ của ứng dụng Bancunglehoi.',
+            'QUY TẮC TUYỆT ĐỐI:',
+            '1. CHỈ được trả lời dựa trên TÀI LIỆU NGUỒN CỦA ỨNG DỤNG được cung cấp trong ngữ cảnh. TUYỆT ĐỐI KHÔNG dùng kiến thức bên ngoài để bổ sung hoặc suy đoán chi tiết không có trong dữ liệu.',
+            `2. Nếu dữ liệu trong ứng dụng KHÔNG chứa thông tin để trả lời câu hỏi (ví dụ: lễ hội không nằm trong danh sách, câu hỏi thời tiết, nhân vật/lịch sử/ẩm thực/số liệu không ghi trong tài liệu), hãy đặt foundInAppData = false, viết answer bắt đầu chính xác bằng "${NO_INFO_VI}", và liệt kê các nguồn chính thống phù hợp trong suggestedOfficialSources.`,
+            '3. Dù trả lời có hay không có thông tin, luôn điền sourcesUsed với tên các nguồn cụ thể trong ứng dụng đã dùng/đã đối chiếu.',
+            '4. Ngắn gọn, trung thực, rõ ràng (tối đa 220 từ).',
+          ].join('\n')
+        : [
+            'You are the internal data lookup assistant for Bancunglehoi.',
+            'STRICT GROUNDING RULES:',
+            '1. Answer ONLY using facts explicitly stated in the APP DATA SOURCES below. NEVER add outside knowledge or speculate beyond the provided records.',
+            `2. If the provided app data does NOT contain the requested information, set foundInAppData = false, begin answer with "${NO_INFO_VI}" followed by the concise English notice, and suggest relevant official portals in suggestedOfficialSources.`,
+            '3. Always populate sourcesUsed with the exact source titles from the provided app data.',
+            '4. Keep answers concise and factual (under 220 words).',
+          ].join('\n');
 
-${contextBlock}
-
-Câu hỏi của người dùng: "${question}"
-
-Yêu cầu trình bày bắt buộc (ngắn gọn, rõ ràng, dưới 220 từ):
-1. Nếu có hồ sơ lễ hội đính kèm, ưu tiên đối chiếu thông tin từ hồ sơ trên trước.
-2. Ghi rõ 2 phần ngắn bằng gạch đầu dòng:
-   - [Đã đối chiếu hồ sơ cổng]: Thông tin khớp trực tiếp với hồ sơ lễ hội hoặc quy tắc chung đã biết chắc chắn.
-   - [Mở rộng do Gemini tổng hợp — chưa kiểm chứng thủ công]: Các gợi ý lịch trình, trang phục, ẩm thực hoặc bối cảnh mở rộng. Tuyệt đối không bịa số hiệu văn bản pháp luật nếu không có trong hồ sơ.`
-        : `You are a Vietnamese cultural guide assistant for the open portal Bancunglehoi. Answer clearly, accurately, and respectfully about Vietnamese cultural heritage.
-
-${contextBlock}
-
-User question: "${question}"
-
-Required concise structure (under 220 words):
-1. Prioritize information from the reviewed portal record if provided.
-2. Explicitly separate two short sections:
-   - [Aligned with Reviewed Record]: Facts directly grounded in the curated portal profile.
-   - [AI-Synthesized Context — Unverified Extension]: Additional visitor etiquette or background tips. Never invent statutory decision numbers.`;
+    const userPrompt = [
+      '=== TÀI LIỆU NGUỒN CỦA ỨNG DỤNG (DỮ LIỆU ĐƯỢC PHÉP SỬ DỤNG DUY NHẤT) ===',
+      groundedContext,
+      '',
+      `=== CÂU HỎI CỦA NGƯỜI DÙNG (${lang.toUpperCase()}) ===`,
+      question,
+    ].join('\n');
 
     try {
       const ai = new GoogleGenAI({
@@ -144,17 +165,40 @@ Required concise structure (under 220 words):
           try {
             response = await ai.models.generateContent({
               model: modelName,
-              contents: prompt,
+              contents: userPrompt,
+              config: {
+                systemInstruction,
+                temperature: 0.1,
+                responseMimeType: 'application/json',
+                responseSchema: {
+                  type: Type.OBJECT,
+                  properties: {
+                    foundInAppData: { type: Type.BOOLEAN },
+                    answer: { type: Type.STRING },
+                    sourcesUsed: {
+                      type: Type.ARRAY,
+                      items: { type: Type.STRING },
+                    },
+                    suggestedOfficialSources: {
+                      type: Type.ARRAY,
+                      items: { type: Type.STRING },
+                    },
+                  },
+                  required: ['foundInAppData', 'answer', 'sourcesUsed', 'suggestedOfficialSources'],
+                },
+              },
             });
             usedModel = modelName;
             break;
           } catch (err) {
             lastErr = err;
-            const errStatus = typeof (err as { status?: unknown })?.status === 'number'
-              ? (err as { status: number }).status
-              : 0;
+            const errStatus =
+              typeof (err as { status?: unknown })?.status === 'number'
+                ? (err as { status: number }).status
+                : 0;
             const errMsg = err instanceof Error ? err.message : '';
-            const isTransient = errStatus === 503 || errStatus === 429 || /UNAVAILABLE|high demand/i.test(errMsg);
+            const isTransient =
+              errStatus === 503 || errStatus === 429 || /UNAVAILABLE|high demand/i.test(errMsg);
             if (!isTransient) {
               throw err;
             }
@@ -170,72 +214,57 @@ Required concise structure (under 220 words):
         throw lastErr ?? new Error('Gemini service unavailable');
       }
 
-      const answer = response.text?.trim();
-      if (!answer) {
+      const rawText = response.text?.trim() || '';
+      if (!rawText) {
         res.status(502).json({
           error:
             lang === 'vi'
-              ? 'Gemini không trả về nội dung văn bản. Vui lòng thử đặt câu hỏi cụ thể hơn.'
-              : 'Gemini returned an empty response. Please try a more specific question.',
+              ? 'Gemini không trả về nội dung văn bản. Vui lòng thử lại.'
+              : 'Gemini returned an empty response. Please try again.',
         });
         return;
       }
 
-      res.json({
-        answer,
-        model: usedModel,
-        reviewedBasis: hasFestivalContext
-          ? lang === 'vi'
-            ? `Đã đối chiếu khung ngữ cảnh với hồ sơ "${festName}" trên Bancunglehoi.`
-            : `Contextualized against the curated Bancunglehoi profile for "${festName}".`
-          : lang === 'vi'
-          ? 'Câu trả lời tổng hợp dựa trên kiến thức văn hóa phổ thông, không thay thế hồ sơ di sản.'
-          : 'General cultural overview, not a substitute for official heritage records.',
-        unverifiedNotice:
-          lang === 'vi'
-            ? `Nội dung do Gemini (${usedModel}) sinh ra đã có khung đối chiếu; riêng các chi tiết mở rộng ngoài hồ sơ gốc chưa qua kiểm chứng thủ công, cần đối chiếu văn bản chính thống tại mục Nguồn & Pháp lý.`
-            : `Gemini (${usedModel}) output follows a reviewed prompt frame; extended details outside the curated dossier have not been manually audited—verify against official citations in Sources & Legal Basis.`,
-        generatedAt: new Date().toISOString(),
-      });
+      const normalized = normalizeGroundedGeminiPayload(rawText, lang, usedModel);
+      res.json(normalized);
     } catch (err) {
-      const rawMessage = err instanceof Error ? err.message : 'Unknown upstream error';
-      const safeMessage = rawMessage.replace(/AIza[0-9A-Za-z_-]{10,}/g, '[REDACTED_KEY]');
-      const status = typeof (err as { status?: unknown })?.status === 'number'
-        ? ((err as { status: number }).status)
-        : 502;
-      console.error('[Gemini API error]:', status, safeMessage);
+      const status =
+        typeof (err as { status?: unknown })?.status === 'number'
+          ? (err as { status: number }).status
+          : 502;
+      // Never print error messages/headers/keys to console logs or browser payloads
+      console.error(`[Gemini API error] status=${status}`);
 
       let userError =
         lang === 'vi'
           ? 'Không thể kết nối tới dịch vụ Gemini lúc này. Vui lòng thử lại sau ít phút.'
           : 'Unable to reach the Gemini service right now. Please try again shortly.';
 
-      if (status === 400 || status === 403 || /API_KEY_INVALID|PERMISSION_DENIED/i.test(safeMessage)) {
+      if (status === 400 || status === 403) {
         userError =
           lang === 'vi'
-            ? 'Khóa GEMINI_API_KEY trên máy chủ chưa hợp lệ hoặc đã bị thu hồi / thiếu quyền (HTTP ' + status + '). Vui lòng kiểm tra hoặc thay khóa mới trong phần Settings > Secrets.'
-            : 'Server GEMINI_API_KEY is invalid, revoked, or lacks permissions (HTTP ' + status + '). Please verify or rotate it in Settings > Secrets.';
-      } else if (status === 429 || /RESOURCE_EXHAUSTED/i.test(safeMessage)) {
+            ? `Khóa GEMINI_API_KEY trên máy chủ chưa hợp lệ hoặc thiếu quyền (HTTP ${status}).`
+            : `Server GEMINI_API_KEY is invalid or lacks permissions (HTTP ${status}).`;
+      } else if (status === 429) {
         userError =
           lang === 'vi'
-            ? 'Dịch vụ Gemini đang tạm thời vượt hạn mức gọi (HTTP 429). Vui lòng thử lại sau ít phút.'
+            ? 'Dịch vụ Gemini đang tạm thời vượt hạn mức gọi (HTTP 429). Vui lòng thử lại sau.'
             : 'Gemini rate limit temporarily exceeded (HTTP 429). Please retry shortly.';
-      } else if (status === 503 || /UNAVAILABLE|high demand/i.test(safeMessage)) {
+      } else if (status === 503) {
         userError =
           lang === 'vi'
-            ? 'Máy chủ Gemini đang quá tải tạm thời (HTTP 503). Hệ thống đã tự động thử lại nhưng chưa nhận được phản hồi, vui lòng thử lại sau vài giây.'
-            : 'Gemini upstream model is temporarily experiencing high demand (HTTP 503). Please retry in a few seconds.';
-      } else if (status === 404 || /NOT_FOUND/i.test(safeMessage)) {
+            ? 'Máy chủ Gemini đang quá tải tạm thời (HTTP 503). Vui lòng thử lại sau vài giây.'
+            : 'Gemini upstream model is temporarily busy (HTTP 503). Please retry shortly.';
+      } else if (status === 404) {
         userError =
           lang === 'vi'
-            ? 'Mô hình Gemini được cấu hình chưa khả dụng với khóa hiện tại (HTTP 404).'
-            : 'Configured Gemini model is unavailable for this API key (HTTP 404).';
+            ? 'Mô hình Gemini được cấu hình chưa khả dụng (HTTP 404).'
+            : 'Configured Gemini model is unavailable (HTTP 404).';
       }
 
       res.status(status >= 400 && status < 600 ? status : 502).json({
         error: userError,
         upstreamStatus: status,
-        upstreamReason: safeMessage.slice(0, 180),
       });
     }
   });
@@ -268,8 +297,8 @@ async function startServer() {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
-  startServer().catch((err) => {
-    console.error('Failed to start server:', err);
+  startServer().catch(() => {
+    console.error('Failed to start Bancunglehoi server.');
     process.exit(1);
   });
 }

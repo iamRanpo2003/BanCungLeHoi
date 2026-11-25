@@ -188,48 +188,48 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
               {t.community.title}
             </h1>
           </div>
-          <p className="text-xs sm:text-sm text-stone-500 mt-1">
+          <p className="text-base text-stone-600 mt-1">
             {t.community.subtitle}
           </p>
         </div>
 
         <button
           onClick={() => setIsSubmitOpen(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-red-700 hover:bg-red-800 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-red-700/20 transition cursor-pointer"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 min-h-[44px] bg-red-700 hover:bg-red-800 text-white font-bold text-sm sm:text-base rounded-xl shadow-md shadow-red-700/20 transition cursor-pointer shrink-0"
         >
-          <PenTool className="w-4 h-4" />
+          <PenTool className="w-4 h-4 shrink-0" />
           <span>{t.community.contributeBtn}</span>
         </button>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <button
           onClick={() => setFilterType('all')}
-          className={`px-4 py-2 text-xs font-bold rounded-xl transition ${
+          className={`px-4 py-2 min-h-[44px] text-sm font-bold rounded-xl transition ${
             filterType === 'all'
               ? 'bg-red-700 text-white shadow-xs'
-              : 'bg-white text-stone-600 hover:bg-stone-50 border border-stone-200'
+              : 'bg-white text-stone-700 hover:bg-stone-50 border border-stone-200'
           }`}
         >
           {lang === 'vi' ? 'Tất cả câu chuyện' : 'All Stories'}
         </button>
         <button
           onClick={() => setFilterType('my')}
-          className={`px-4 py-2 text-xs font-bold rounded-xl transition ${
+          className={`px-4 py-2 min-h-[44px] text-sm font-bold rounded-xl transition ${
             filterType === 'my'
               ? 'bg-red-700 text-white shadow-xs'
-              : 'bg-white text-stone-600 hover:bg-stone-50 border border-stone-200'
+              : 'bg-white text-stone-700 hover:bg-stone-50 border border-stone-200'
           }`}
         >
           {lang === 'vi' ? 'Bài viết của tôi' : 'My Contributions'}
         </button>
         <button
           onClick={() => setFilterType('pending')}
-          className={`px-4 py-2 text-xs font-bold rounded-xl transition ${
+          className={`px-4 py-2 min-h-[44px] text-sm font-bold rounded-xl transition ${
             filterType === 'pending'
               ? 'bg-amber-600 text-white shadow-xs'
-              : 'bg-white text-stone-600 hover:bg-stone-50 border border-stone-200'
+              : 'bg-white text-stone-700 hover:bg-stone-50 border border-stone-200'
           }`}
         >
           {lang === 'vi' ? 'Đang chờ duyệt' : 'Pending Moderation'}
@@ -252,13 +252,14 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
               </div>
               <button
                 onClick={() => setIsSubmitOpen(false)}
-                className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-100"
+                aria-label={lang === 'vi' ? 'Đóng' : 'Close'}
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center text-stone-500 hover:text-stone-800 rounded-lg hover:bg-stone-100"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-3 rounded-2xl bg-amber-50/80 border border-amber-200 text-xs text-amber-950 leading-relaxed flex items-start gap-2">
+            <div className="p-3 rounded-2xl bg-amber-50/80 border border-amber-200 text-sm text-amber-950 leading-relaxed flex items-start gap-2">
               <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
               <span>
                 {lang === 'vi'
@@ -273,14 +274,14 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
                 <h4 className="font-extrabold text-emerald-950 text-base">
                   {lang === 'vi' ? 'Đã gửi câu chuyện thành công!' : 'Story submitted successfully!'}
                 </h4>
-                <p className="text-xs text-emerald-800">
+                <p className="text-base text-emerald-800">
                   {lang === 'vi'
                     ? 'Bài viết của bạn đã được lưu và đưa vào hàng chờ kiểm duyệt CMS trước khi hiển thị công khai.'
                     : 'Your story has been saved and queued for CMS editorial review before public display.'}
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleSubmitStory} className="space-y-4 text-xs">
+              <form onSubmit={handleSubmitStory} className="space-y-4 text-sm">
                 <div>
                   <label className="block text-stone-700 font-bold mb-1">
                     {lang === 'vi' ? 'Tiêu đề câu chuyện / Trải nghiệm *' : 'Story Title *'}
@@ -291,7 +292,7 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
                     placeholder={lang === 'vi' ? 'VD: Trải nghiệm lễ rước kiệu đền Hùng rực rỡ sắc màu' : 'e.g., Majestic procession at Hung King Temple'}
                     value={title}
                     onChange={(e) => handleDraftChange('title', e.target.value)}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-red-600"
+                    className="w-full min-h-[44px] text-base bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-red-600"
                   />
                 </div>
 
@@ -306,14 +307,14 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
                       disabled={postAnonymously}
                       value={postAnonymously ? (lang === 'vi' ? 'Khách tham quan ẩn danh' : 'Anonymous Visitor') : authorName}
                       onChange={(e) => handleDraftChange('authorName', e.target.value)}
-                      className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-red-600 disabled:opacity-60"
+                      className="w-full min-h-[44px] text-base bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-red-600 disabled:opacity-60"
                     />
-                    <label className="flex items-center gap-2 mt-1.5 text-[11px] text-stone-600 cursor-pointer select-none">
+                    <label className="flex items-center gap-2 mt-2 min-h-[44px] text-sm text-stone-700 cursor-pointer select-none">
                       <input
                         type="checkbox"
                         checked={postAnonymously}
                         onChange={(e) => setPostAnonymously(e.target.checked)}
-                        className="rounded border-stone-300 text-red-700 focus:ring-red-600"
+                        className="w-5 h-5 rounded border-stone-300 text-red-700 focus:ring-red-600 shrink-0"
                       />
                       <span>
                         {lang === 'vi'
@@ -329,7 +330,7 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
                     <select
                       value={authorRole}
                       onChange={(e) => handleDraftChange('authorRole', e.target.value)}
-                      className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 font-semibold focus:outline-none focus:border-red-600"
+                      className="w-full min-h-[44px] text-base bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 font-semibold focus:outline-none focus:border-red-600"
                     >
                       <option value="Du khách trẩy hội">{lang === 'vi' ? 'Du khách trẩy hội' : 'Visitor'}</option>
                       <option value="Người dân bản địa">{lang === 'vi' ? 'Người dân bản địa' : 'Local Resident'}</option>
@@ -347,7 +348,7 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
                     <select
                       value={selectedFestivalId}
                       onChange={(e) => handleDraftChange('festivalId', e.target.value)}
-                      className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 font-medium focus:outline-none focus:border-red-600"
+                      className="w-full min-h-[44px] text-base bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 font-medium focus:outline-none focus:border-red-600"
                     >
                       {festivals.map((f) => (
                         <option key={f.id} value={f.id}>
@@ -364,7 +365,7 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
                       type="text"
                       value={province}
                       onChange={(e) => handleDraftChange('province', e.target.value)}
-                      className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 font-medium focus:outline-none focus:border-red-600"
+                      className="w-full min-h-[44px] text-base bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 font-medium focus:outline-none focus:border-red-600"
                     />
                   </div>
                   <div>
@@ -375,7 +376,7 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
                       type="text"
                       value={ethnicGroup}
                       onChange={(e) => handleDraftChange('ethnicGroup', e.target.value)}
-                      className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 font-medium focus:outline-none focus:border-red-600"
+                      className="w-full min-h-[44px] text-base bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 font-medium focus:outline-none focus:border-red-600"
                     />
                   </div>
                 </div>
@@ -390,7 +391,7 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
                     placeholder={lang === 'vi' ? 'Mô tả không khí, nghi lễ tâm đắc, món ăn truyền thống, điều cần chú ý khi tới tham quan...' : 'Describe the atmosphere, rituals, traditional food, or tips for visitors...'}
                     value={content}
                     onChange={(e) => handleDraftChange('content', e.target.value)}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl p-3 font-medium focus:outline-none focus:border-red-600 leading-relaxed"
+                    className="w-full text-base bg-stone-50 border border-stone-200 rounded-xl p-3 font-medium focus:outline-none focus:border-red-600 leading-relaxed"
                   />
                 </div>
 
@@ -403,7 +404,7 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
                     placeholder={lang === 'vi' ? 'VD: Ghi chép điền dã cá nhân tại bản làng, phỏng vấn nghệ nhân...' : 'e.g., Personal fieldwork notes, artisan interview...'}
                     value={sourceReference}
                     onChange={(e) => handleDraftChange('sourceReference', e.target.value)}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-red-600"
+                    className="w-full min-h-[44px] text-base bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-red-600"
                   />
                 </div>
 
@@ -418,7 +419,7 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
                     placeholder="https://..."
                     value={imageUrl}
                     onChange={(e) => handleDraftChange('imageUrl', e.target.value)}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-red-600"
+                    className="w-full min-h-[44px] text-base bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-red-600"
                   />
                 </div>
 
@@ -486,17 +487,17 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
                   </div>
                 )}
 
-                <div className="flex justify-end gap-2 pt-2 border-t border-stone-100">
+                <div className="flex flex-wrap justify-end gap-2 pt-2 border-t border-stone-100">
                   <button
                     type="button"
                     onClick={() => setIsSubmitOpen(false)}
-                    className="px-4 py-2 border border-stone-200 text-stone-600 font-bold rounded-xl"
+                    className="min-h-[44px] px-4 py-2 border border-stone-200 text-stone-700 font-bold text-sm rounded-xl"
                   >
                     {lang === 'vi' ? 'Hủy bỏ' : 'Cancel'}
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 bg-red-700 hover:bg-red-800 text-white font-bold rounded-xl shadow-xs cursor-pointer"
+                    className="min-h-[44px] px-5 py-2 bg-red-700 hover:bg-red-800 text-white font-bold text-sm rounded-xl shadow-xs cursor-pointer"
                   >
                     {lang === 'vi' ? 'Gửi duyệt bài viết' : 'Submit for Review'}
                   </button>
@@ -551,17 +552,17 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
                   {story.title}
                 </h3>
 
-                <p className="text-xs text-stone-600 leading-relaxed line-clamp-3">
+                <p className="text-base text-stone-600 leading-relaxed line-clamp-3">
                   {story.content}
                 </p>
 
-                <div className="space-y-1 text-[11px] text-stone-500">
+                <div className="space-y-1 text-xs text-stone-500">
                   <div className="italic">
                     {lang === 'vi' ? 'Nguồn tư liệu: ' : 'Source: '} {story.sourceReference}
                   </div>
                   {story.images?.[0] && (
-                    <div className="flex items-center gap-1 text-[10px] text-stone-500">
-                      <Camera className="w-3 h-3 text-amber-700 shrink-0" />
+                    <div className="flex items-center gap-1 text-xs text-stone-500">
+                      <Camera className="w-3.5 h-3.5 text-amber-700 shrink-0" />
                       <span className="truncate">
                         {lang === 'vi'
                           ? getMediaAttribution(story.images[0], story.sourceReference).captionVi
@@ -574,23 +575,24 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
             </div>
 
             <div className="p-5 pt-3 border-t border-stone-100 flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-red-100 text-red-800 flex items-center justify-center font-bold text-[10px]">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-7 h-7 rounded-full bg-red-100 text-red-800 flex items-center justify-center font-bold text-xs shrink-0">
                   {story.authorName.charAt(0)}
                 </div>
-                <div>
-                  <span className="font-bold text-stone-800 block text-[11px]">
+                <div className="min-w-0">
+                  <span className="font-bold text-stone-800 block text-xs truncate">
                     {story.authorName}
                   </span>
-                  <span className="text-[9px] text-stone-400">{story.authorRole}</span>
+                  <span className="text-[11px] text-stone-500 truncate block">{story.authorRole}</span>
                 </div>
               </div>
 
               <button
                 onClick={() => handleLike(story.id)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition font-bold"
+                aria-label={lang === 'vi' ? 'Yêu thích câu chuyện' : 'Like story'}
+                className="flex items-center justify-center gap-1.5 min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 transition font-bold text-sm shrink-0"
               >
-                <Heart className="w-3.5 h-3.5 fill-current" />
+                <Heart className="w-4 h-4 fill-current" />
                 <span>{story.likes}</span>
               </button>
             </div>
@@ -599,13 +601,13 @@ export const CommunityStoriesView: React.FC<CommunityStoriesViewProps> = ({
       </div>
 
       {/* Mandatory Disclaimer */}
-      <div className="bg-amber-50/90 border-2 border-amber-300 rounded-3xl p-5 text-amber-950 text-xs sm:text-sm leading-relaxed flex items-start gap-3">
+      <div className="bg-amber-50/90 border-2 border-amber-300 rounded-3xl p-5 text-amber-950 text-base leading-relaxed flex items-start gap-3">
         <Info className="w-6 h-6 text-amber-700 shrink-0 mt-0.5" />
         <div>
           <h2 className="font-extrabold text-sm text-amber-900 uppercase tracking-wider mb-1">
             {lang === 'vi' ? 'Khuyến cáo pháp lý bắt buộc:' : 'Mandatory Legal Notice:'}
           </h2>
-          <p>{LEGAL_DISCLAIMER}</p>
+          <p className="text-base">{LEGAL_DISCLAIMER}</p>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { LegalDocument } from '../types/festival';
+import type { LegalDocument } from '../types/festival.ts';
 
 export const LEGAL_DISCLAIMER =
   'Lưu ý quan trọng: Thông tin về lễ hội, sự kiện lịch sử và các căn cứ pháp lý trên hệ thống chỉ mang tính chất tham khảo, nghiên cứu và hỗ trợ cộng đồng trẩy hội văn minh; không thay thế văn bản pháp luật chính thức do cơ quan nhà nước có thẩm quyền ban hành.';

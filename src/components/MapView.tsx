@@ -107,23 +107,23 @@ export const MapView: React.FC<MapViewProps> = ({
               {t.map.title}
             </h1>
           </div>
-          <p className="text-xs sm:text-sm text-stone-500 mt-1">
+          <p className="text-base text-stone-600 mt-1">
             {t.map.subtitle}
           </p>
         </div>
 
         {/* User location simulator */}
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1.5 text-xs text-stone-700 bg-amber-50/70 px-3 py-2 rounded-xl border border-amber-200">
-            <Navigation className="w-3.5 h-3.5 text-red-700" />
-            <span className="font-bold">{t.map.yourLocation}</span>
+          <div className="flex items-center gap-1.5 text-sm text-stone-700 bg-amber-50/70 px-3 py-1.5 min-h-[44px] rounded-xl border border-amber-200 w-full sm:w-auto">
+            <Navigation className="w-4 h-4 text-red-700 shrink-0" />
+            <span className="font-bold shrink-0">{t.map.yourLocation}</span>
             <select
               value={selectedUserLocation.name}
               onChange={(e) => {
                 const found = USER_LOCATIONS.find((l) => l.name === e.target.value);
                 if (found) setSelectedUserLocation(found);
               }}
-              className="bg-transparent font-bold text-red-800 focus:outline-none cursor-pointer"
+              className="bg-transparent font-bold text-red-800 focus:outline-none cursor-pointer min-h-[40px] text-base min-w-0 flex-1"
             >
               {USER_LOCATIONS.map((loc) => (
                 <option key={loc.name} value={loc.name}>
@@ -133,43 +133,43 @@ export const MapView: React.FC<MapViewProps> = ({
             </select>
           </div>
 
-          <div className="flex flex-wrap items-center gap-1 bg-stone-100 p-1 rounded-xl text-xs">
+          <div className="flex flex-wrap items-center gap-1.5 bg-stone-100 p-1.5 rounded-xl text-sm">
             <button
               onClick={() => setFilterRegion('All')}
-              className={`px-2.5 py-1 rounded-lg font-bold transition ${
-                filterRegion === 'All' ? 'bg-red-700 text-white shadow-xs' : 'text-stone-600'
+              className={`px-3 py-2 min-h-[44px] rounded-lg font-bold transition ${
+                filterRegion === 'All' ? 'bg-red-700 text-white shadow-xs' : 'text-stone-700'
               }`}
             >
               {lang === 'vi' ? 'Toàn quốc' : 'All'}
             </button>
             <button
               onClick={() => setFilterRegion('Bắc')}
-              className={`px-2 py-1 rounded-lg font-bold transition ${
-                filterRegion === 'Bắc' ? 'bg-red-700 text-white shadow-xs' : 'text-stone-600'
+              className={`px-3 py-2 min-h-[44px] rounded-lg font-bold transition ${
+                filterRegion === 'Bắc' ? 'bg-red-700 text-white shadow-xs' : 'text-stone-700'
               }`}
             >
               {lang === 'vi' ? 'Bắc' : 'North'}
             </button>
             <button
               onClick={() => setFilterRegion('Trung')}
-              className={`px-2 py-1 rounded-lg font-bold transition ${
-                filterRegion === 'Trung' ? 'bg-red-700 text-white shadow-xs' : 'text-stone-600'
+              className={`px-3 py-2 min-h-[44px] rounded-lg font-bold transition ${
+                filterRegion === 'Trung' ? 'bg-red-700 text-white shadow-xs' : 'text-stone-700'
               }`}
             >
               {lang === 'vi' ? 'Trung' : 'Central'}
             </button>
             <button
               onClick={() => setFilterRegion('Tây Nguyên')}
-              className={`px-2 py-1 rounded-lg font-bold transition ${
-                filterRegion === 'Tây Nguyên' ? 'bg-red-700 text-white shadow-xs' : 'text-stone-600'
+              className={`px-3 py-2 min-h-[44px] rounded-lg font-bold transition ${
+                filterRegion === 'Tây Nguyên' ? 'bg-red-700 text-white shadow-xs' : 'text-stone-700'
               }`}
             >
               {lang === 'vi' ? 'Tây Nguyên' : 'Highlands'}
             </button>
             <button
               onClick={() => setFilterRegion('Nam')}
-              className={`px-2 py-1 rounded-lg font-bold transition ${
-                filterRegion === 'Nam' ? 'bg-red-700 text-white shadow-xs' : 'text-stone-600'
+              className={`px-3 py-2 min-h-[44px] rounded-lg font-bold transition ${
+                filterRegion === 'Nam' ? 'bg-red-700 text-white shadow-xs' : 'text-stone-700'
               }`}
             >
               {lang === 'vi' ? 'Nam' : 'South'}
@@ -297,25 +297,25 @@ export const MapView: React.FC<MapViewProps> = ({
                 <span>{lang === 'vi' ? `Dân tộc ${activeEvent.ethnicGroup}` : `Ethnic ${activeEvent.ethnicGroup}`}</span>
               </div>
               <h3 className="text-lg font-black text-stone-900 mt-1 font-serif">{activeName}</h3>
-              <p className="text-xs text-stone-600 line-clamp-2 mt-1 leading-relaxed">
+              <p className="text-base text-stone-700 line-clamp-3 mt-1 leading-relaxed">
                 {activeOrigin}
               </p>
             </div>
 
-            <div className="bg-amber-50/50 p-3 rounded-xl border border-amber-200 text-xs space-y-1.5">
+            <div className="bg-amber-50/50 p-3 rounded-xl border border-amber-200 text-sm space-y-1.5">
               <div className="flex items-center gap-1.5 text-stone-800">
-                <Calendar className="w-3.5 h-3.5 text-red-700 shrink-0" />
+                <Calendar className="w-4 h-4 text-red-700 shrink-0" />
                 <span>
                   {lang === 'vi' ? `Năm ${targetYear}: ` : `Year ${targetYear}: `}
                   <strong>{activeCalculated.solarStartDate}</strong> ({activeCalculated.lunarStartDateText.split('(')[0]})
                 </span>
               </div>
               <div className="flex items-center gap-1.5 text-stone-800">
-                <MapPin className="w-3.5 h-3.5 text-red-700 shrink-0" />
+                <MapPin className="w-4 h-4 text-red-700 shrink-0" />
                 <span>{activeEvent.locationName}</span>
               </div>
-              <div className="flex items-center gap-1.5 text-stone-600">
-                <FileText className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+              <div className="flex items-center gap-1.5 text-stone-700">
+                <FileText className="w-4 h-4 text-stone-500 shrink-0" />
                 <span className="truncate" title={activeEvent.legalBasis.documentNumber}>
                   {lang === 'vi' ? 'Căn cứ: ' : 'Legal basis: '}
                   <strong>{activeEvent.legalBasis.documentNumber}</strong>
@@ -325,10 +325,10 @@ export const MapView: React.FC<MapViewProps> = ({
 
             <button
               onClick={() => onSelectEvent(activeEvent)}
-              className="w-full py-2.5 bg-red-700 hover:bg-red-800 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full min-h-[44px] py-2.5 px-4 bg-red-700 hover:bg-red-800 text-white font-bold text-sm sm:text-base rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span>{lang === 'vi' ? 'Xem toàn bộ nghi thức & hướng dẫn đường đi' : 'View Rituals & Directions Guide'}</span>
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4 shrink-0" />
             </button>
           </div>
 
@@ -374,13 +374,13 @@ export const MapView: React.FC<MapViewProps> = ({
       </div>
 
       {/* Mandatory Legal Advisory Note */}
-      <div className="bg-amber-50/90 border-2 border-amber-300 rounded-3xl p-5 text-amber-950 text-xs sm:text-sm leading-relaxed flex items-start gap-3">
+      <div className="bg-amber-50/90 border-2 border-amber-300 rounded-3xl p-5 text-amber-950 text-base leading-relaxed flex items-start gap-3">
         <Info className="w-6 h-6 text-amber-700 shrink-0 mt-0.5" />
         <div>
           <h2 className="font-extrabold text-sm text-amber-900 uppercase tracking-wider mb-1">
             {lang === 'vi' ? 'Khuyến cáo pháp lý bắt buộc:' : 'Mandatory Legal Notice:'}
           </h2>
-          <p>{LEGAL_DISCLAIMER}</p>
+          <p className="text-base">{LEGAL_DISCLAIMER}</p>
         </div>
       </div>
     </div>

@@ -59,7 +59,7 @@ export const SplashAuthModal: React.FC<SplashAuthModalProps> = ({
         <div className="heritage-gradient-bar p-6 text-amber-50 relative">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-amber-100 hover:text-white hover:bg-white/10 rounded-full transition"
+            className="absolute top-3 right-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-amber-100 hover:text-white hover:bg-white/10 rounded-full transition"
             aria-label="Đóng cửa sổ"
           >
             <X className="w-5 h-5" />
@@ -75,7 +75,7 @@ export const SplashAuthModal: React.FC<SplashAuthModalProps> = ({
           <h2 className="text-2xl font-bold font-serif">
             Tùy chỉnh Trải nghiệm & Sở thích
           </h2>
-          <p className="text-sm text-amber-100/90 mt-1">
+          <p className="text-base text-amber-100/95 mt-1">
             Mọi tính năng đều mở tự do không cần tài khoản. Tùy chọn dưới đây được lưu cục bộ trên trình duyệt của bạn.
           </p>
         </div>
@@ -93,10 +93,10 @@ export const SplashAuthModal: React.FC<SplashAuthModalProps> = ({
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Ví dụ: Khách tham quan"
-                className="w-full text-sm pl-9 pr-4 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-100"
+                className="w-full min-h-[44px] text-base pl-9 pr-4 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-100"
               />
             </div>
-            <p className="text-[11px] text-stone-500 mt-1">
+            <p className="text-base text-stone-600 mt-1.5 leading-relaxed">
               Mục đích: Chỉ dùng để điền sẵn tên hiển thị trên thanh điều hướng và bài viết cộng đồng trên chính thiết bị của bạn; không gửi về máy chủ và có thể xóa tại mục Hồ sơ.
             </p>
           </div>
@@ -114,13 +114,13 @@ export const SplashAuthModal: React.FC<SplashAuthModalProps> = ({
                     key={interest}
                     type="button"
                     onClick={() => toggleInterest(interest)}
-                    className={`px-3 py-2 rounded-xl text-xs font-semibold transition border flex items-center gap-1.5 ${
+                    className={`min-h-[44px] px-3 py-2 rounded-xl text-sm font-semibold transition border flex items-center gap-1.5 ${
                       isSelected
                         ? 'bg-red-700 text-white border-red-700 shadow-xs'
                         : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-amber-50'
                     }`}
                   >
-                    {isSelected && <Check className="w-3.5 h-3.5 stroke-[2.5]" />}
+                    {isSelected && <Check className="w-3.5 h-3.5 stroke-[2.5] shrink-0" />}
                     <span>{interest}</span>
                   </button>
                 );
@@ -132,44 +132,44 @@ export const SplashAuthModal: React.FC<SplashAuthModalProps> = ({
             <label className="block text-xs font-bold text-stone-700 uppercase mb-1.5">
               Chế độ xem giao diện (Đều mở công khai)
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setRole('user')}
-                className={`p-2.5 text-xs font-semibold rounded-xl border text-left transition ${
+                className={`min-h-[44px] p-3 text-sm font-semibold rounded-xl border text-left transition ${
                   role === 'user'
                     ? 'border-red-700 bg-red-50 text-red-950 ring-2 ring-red-100'
-                    : 'border-stone-200 text-stone-600 hover:bg-stone-50'
+                    : 'border-stone-200 text-stone-700 hover:bg-stone-50'
                 }`}
               >
                 <div className="font-bold flex items-center justify-between">
                   <span>Khách tra cứu</span>
-                  {role === 'user' && <Check className="w-3.5 h-3.5 text-red-700" />}
+                  {role === 'user' && <Check className="w-4 h-4 text-red-700" />}
                 </div>
-                <span className="text-[11px] text-stone-500 font-normal">Tra cứu, lưu lịch, đóng góp</span>
+                <span className="text-xs text-stone-600 font-normal">Tra cứu, lưu lịch, đóng góp</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setRole('admin')}
-                className={`p-2.5 text-xs font-semibold rounded-xl border text-left transition ${
+                className={`min-h-[44px] p-3 text-sm font-semibold rounded-xl border text-left transition ${
                   role === 'admin'
                     ? 'border-amber-600 bg-amber-50 text-amber-950 ring-2 ring-amber-100'
-                    : 'border-stone-200 text-stone-600 hover:bg-stone-50'
+                    : 'border-stone-200 text-stone-700 hover:bg-stone-50'
                 }`}
               >
                 <div className="font-bold flex items-center justify-between">
                   <span>Biên tập dữ liệu CMS</span>
-                  {role === 'admin' && <Check className="w-3.5 h-3.5 text-amber-700" />}
+                  {role === 'admin' && <Check className="w-4 h-4 text-amber-700" />}
                 </div>
-                <span className="text-[11px] text-stone-500 font-normal">Quản lý & thêm sự kiện thử nghiệm</span>
+                <span className="text-xs text-stone-600 font-normal">Quản lý & thêm sự kiện thử nghiệm</span>
               </button>
             </div>
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 bg-red-700 hover:bg-red-800 text-white font-bold text-sm rounded-xl shadow-md shadow-red-700/20 transition cursor-pointer"
+            className="w-full min-h-[44px] py-3 bg-red-700 hover:bg-red-800 text-white font-bold text-base rounded-xl shadow-md shadow-red-700/20 transition cursor-pointer"
           >
             Lưu tùy chọn cục bộ
           </button>

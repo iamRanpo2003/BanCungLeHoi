@@ -7,10 +7,18 @@
     --paper-bg: #fcfbf7;
   }
 
+  html {
+    font-size: 16px;
+    overflow-x: hidden;
+  }
+
   body {
     font-family: 'Be Vietnam Pro', 'Plus Jakarta Sans', 'Noto Sans', 'DejaVu Sans', system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
     color: #1e293b;
     background-color: #fdfbf7;
+    overflow-x: hidden;
     transition: background-color 0.2s ease, color 0.2s ease, font-size 0.2s ease;
   }
 }

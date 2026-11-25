@@ -171,7 +171,7 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
                 {t.calendar.title}
               </h1>
             </div>
-            <p className="text-xs sm:text-sm text-stone-500 mt-1">
+            <p className="text-base text-stone-600 mt-1">
               {t.calendar.subtitle}
             </p>
           </div>
@@ -181,39 +181,39 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
             <div className="flex items-center bg-stone-100 p-1 rounded-xl">
               <button
                 onClick={() => setTargetYear(targetYear - 1)}
-                className="p-1.5 text-stone-600 hover:text-stone-900 rounded-lg hover:bg-white"
+                className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 text-stone-600 hover:text-stone-900 rounded-lg hover:bg-white cursor-pointer"
                 title="Năm trước"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-5 h-5" />
               </button>
-              <span className="px-3 text-sm font-extrabold text-red-950 font-mono">
+              <span className="px-3 text-base font-extrabold text-red-950 font-mono">
                 {lang === 'vi' ? `Năm ${targetYear}` : `Year ${targetYear}`}
               </span>
               <button
                 onClick={() => setTargetYear(targetYear + 1)}
-                className="p-1.5 text-stone-600 hover:text-stone-900 rounded-lg hover:bg-white"
+                className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 text-stone-600 hover:text-stone-900 rounded-lg hover:bg-white cursor-pointer"
                 title="Năm sau"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-5 h-5" />
               </button>
             </div>
 
             {/* Open Converter Button */}
             <button
               onClick={() => setConverterOpen(!converterOpen)}
-              className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl bg-amber-100 text-amber-950 border border-amber-300 hover:bg-amber-200 transition"
+              className="min-h-[44px] flex items-center gap-1.5 text-sm font-bold px-3.5 py-2 rounded-xl bg-amber-100 text-amber-950 border border-amber-300 hover:bg-amber-200 transition cursor-pointer"
             >
-              <ArrowRightLeft className="w-3.5 h-3.5 text-amber-800" />
+              <ArrowRightLeft className="w-4 h-4 text-amber-800" />
               <span>{t.converter.tabTitle}</span>
             </button>
 
             {/* Export ICS */}
             <button
               onClick={() => exportToICS(filteredEvents)}
-              className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl bg-red-700 text-white hover:bg-red-800 transition shadow-xs"
+              className="min-h-[44px] flex items-center gap-1.5 text-sm font-bold px-3.5 py-2 rounded-xl bg-red-700 text-white hover:bg-red-800 transition shadow-xs cursor-pointer"
               title="Xuất file iCalendar .ics"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-4 h-4" />
               <span>{t.calendar.exportICS}</span>
             </button>
           </div>
@@ -221,19 +221,19 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
 
         {/* Converter Tool Card (Collapsible, Persisted) */}
         {converterOpen && (
-          <div className="p-5 rounded-2xl bg-amber-50/70 border-2 border-amber-300 space-y-4">
-            <div className="flex items-center justify-between border-b border-amber-200 pb-2">
-              <div className="flex items-center gap-2 text-red-900 font-bold text-sm">
-                <Sparkles className="w-4 h-4 text-amber-600" />
+          <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/70 border-2 border-amber-300 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-amber-200 pb-3">
+              <div className="flex flex-wrap items-center gap-2 text-red-900 font-bold text-base">
+                <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
                 <span>{t.converter.boxTitle}</span>
-                <span className="text-[10px] bg-emerald-600 text-white px-1.5 py-0.5 rounded font-mono">
+                <span className="text-xs bg-emerald-600 text-white px-2 py-0.5 rounded font-mono">
                   {lang === 'vi' ? 'Dữ liệu được tự động lưu' : 'Auto-saved'}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={() => updateConverter({ convType: 'lunarToSolar' })}
-                  className={`text-xs px-2.5 py-1 rounded-lg font-bold transition ${
+                  className={`min-h-[44px] text-sm px-3 py-2 rounded-lg font-bold transition cursor-pointer ${
                     convType === 'lunarToSolar'
                       ? 'bg-red-700 text-white shadow-xs'
                       : 'bg-white text-stone-700 hover:bg-amber-100'
@@ -243,7 +243,7 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
                 </button>
                 <button
                   onClick={() => updateConverter({ convType: 'solarToLunar' })}
-                  className={`text-xs px-2.5 py-1 rounded-lg font-bold transition ${
+                  className={`min-h-[44px] text-sm px-3 py-2 rounded-lg font-bold transition cursor-pointer ${
                     convType === 'solarToLunar'
                       ? 'bg-red-700 text-white shadow-xs'
                       : 'bg-white text-stone-700 hover:bg-amber-100'
@@ -256,78 +256,78 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
 
             {/* Converter Inputs */}
             {convType === 'lunarToSolar' ? (
-              <div className="grid grid-cols-3 gap-3 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-base">
                 <div>
-                  <label className="block text-stone-600 font-bold mb-1">{t.converter.dayLunar}</label>
+                  <label className="block text-stone-700 font-bold mb-1">{t.converter.dayLunar}</label>
                   <input
                     type="number"
                     min={1}
                     max={30}
                     value={convLunarDay}
                     onChange={(e) => updateConverter({ lunarDay: Number(e.target.value) })}
-                    className="w-full bg-white px-3 py-2 border border-amber-300 rounded-xl font-bold"
+                    className="w-full min-h-[44px] bg-white px-3 py-2 border border-amber-300 rounded-xl font-bold text-base"
                   />
                 </div>
                 <div>
-                  <label className="block text-stone-600 font-bold mb-1">{t.converter.monthLunar}</label>
+                  <label className="block text-stone-700 font-bold mb-1">{t.converter.monthLunar}</label>
                   <input
                     type="number"
                     min={1}
                     max={12}
                     value={convLunarMonth}
                     onChange={(e) => updateConverter({ lunarMonth: Number(e.target.value) })}
-                    className="w-full bg-white px-3 py-2 border border-amber-300 rounded-xl font-bold"
+                    className="w-full min-h-[44px] bg-white px-3 py-2 border border-amber-300 rounded-xl font-bold text-base"
                   />
                 </div>
                 <div>
-                  <label className="block text-stone-600 font-bold mb-1">{t.converter.year}</label>
+                  <label className="block text-stone-700 font-bold mb-1">{t.converter.year}</label>
                   <input
                     type="number"
                     value={convLunarYear}
                     onChange={(e) => updateConverter({ lunarYear: Number(e.target.value) })}
-                    className="w-full bg-white px-3 py-2 border border-amber-300 rounded-xl font-bold font-mono"
+                    className="w-full min-h-[44px] bg-white px-3 py-2 border border-amber-300 rounded-xl font-bold font-mono text-base"
                   />
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-3 gap-3 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-base">
                 <div>
-                  <label className="block text-stone-600 font-bold mb-1">{t.converter.daySolar}</label>
+                  <label className="block text-stone-700 font-bold mb-1">{t.converter.daySolar}</label>
                   <input
                     type="number"
                     min={1}
                     max={31}
                     value={convSolarDay}
                     onChange={(e) => updateConverter({ solarDay: Number(e.target.value) })}
-                    className="w-full bg-white px-3 py-2 border border-amber-300 rounded-xl font-bold"
+                    className="w-full min-h-[44px] bg-white px-3 py-2 border border-amber-300 rounded-xl font-bold text-base"
                   />
                 </div>
                 <div>
-                  <label className="block text-stone-600 font-bold mb-1">{t.converter.monthSolar}</label>
+                  <label className="block text-stone-700 font-bold mb-1">{t.converter.monthSolar}</label>
                   <input
                     type="number"
                     min={1}
                     max={12}
                     value={convSolarMonth}
                     onChange={(e) => updateConverter({ solarMonth: Number(e.target.value) })}
-                    className="w-full bg-white px-3 py-2 border border-amber-300 rounded-xl font-bold"
+                    className="w-full min-h-[44px] bg-white px-3 py-2 border border-amber-300 rounded-xl font-bold text-base"
                   />
                 </div>
                 <div>
-                  <label className="block text-stone-600 font-bold mb-1">{t.converter.year}</label>
+                  <label className="block text-stone-700 font-bold mb-1">{t.converter.year}</label>
                   <input
                     type="number"
                     value={convSolarYear}
                     onChange={(e) => updateConverter({ solarYear: Number(e.target.value) })}
-                    className="w-full bg-white px-3 py-2 border border-amber-300 rounded-xl font-bold font-mono"
+                    className="w-full min-h-[44px] bg-white px-3 py-2 border border-amber-300 rounded-xl font-bold font-mono text-base"
                   />
                 </div>
               </div>
             )}
 
             {/* Result Box */}
-            <div className="p-3 bg-white rounded-xl border border-amber-300 text-xs text-stone-800 font-medium leading-relaxed">
-              <strong className="text-red-800 block text-xs uppercase mb-0.5">
+            <div className="p-3.5 bg-white rounded-xl border border-amber-300 text-base text-stone-800 font-medium leading-relaxed">
+              <strong className="text-red-800 block text-sm uppercase mb-0.5">
                 {t.converter.resultLabel}:
               </strong>
               {convertedResultText}
@@ -337,12 +337,12 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
 
         {/* Filter Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-stone-100 pt-4">
-          <div className="flex flex-wrap items-center gap-2 text-xs">
+          <div className="flex flex-wrap items-center gap-2 text-base w-full lg:w-auto">
             {/* Region Filter */}
             <select
               value={selectedRegion}
               onChange={(e) => setSelectedRegion(e.target.value as Region | 'All')}
-              className="bg-stone-50 border border-stone-200 rounded-xl px-3 py-1.5 font-semibold text-stone-700 focus:outline-none"
+              className="min-h-[44px] bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-semibold text-stone-700 focus:outline-none text-base max-w-full"
             >
               <option value="All">{t.calendar.filterAllRegions}</option>
               <option value="Bắc">{lang === 'vi' ? 'Miền Bắc' : 'Northern'}</option>
@@ -355,7 +355,7 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value as EventCategory | 'All')}
-              className="bg-stone-50 border border-stone-200 rounded-xl px-3 py-1.5 font-semibold text-stone-700 focus:outline-none"
+              className="min-h-[44px] bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-semibold text-stone-700 focus:outline-none text-base max-w-full"
             >
               <option value="All">{t.calendar.filterAllCategories}</option>
               <option value="Lễ hội">{lang === 'vi' ? 'Lễ hội' : 'Festivals'}</option>
@@ -368,7 +368,7 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
             <select
               value={selectedProvince}
               onChange={(e) => setSelectedProvince(e.target.value)}
-              className="bg-stone-50 border border-stone-200 rounded-xl px-3 py-1.5 font-semibold text-stone-700 focus:outline-none max-w-[240px]"
+              className="min-h-[44px] bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-semibold text-stone-700 focus:outline-none text-base w-full sm:w-auto sm:max-w-[260px]"
             >
               <option value="All">{t.calendar.filterAllProvinces}</option>
               {provinces.map((p) => (
@@ -380,27 +380,27 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
           </div>
 
           {/* Grid vs Timeline toggle */}
-          <div className="flex items-center bg-stone-100 p-1 rounded-xl">
+          <div className="flex items-center bg-stone-100 p-1 rounded-xl gap-1">
             <button
               onClick={() => setViewMode('grid')}
-              className={`flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-lg transition ${
+              className={`min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 text-sm font-bold rounded-lg transition cursor-pointer ${
                 viewMode === 'grid'
                   ? 'bg-white text-red-950 shadow-xs'
                   : 'text-stone-600 hover:text-stone-900'
               }`}
             >
-              <Grid className="w-3.5 h-3.5" />
+              <Grid className="w-4 h-4" />
               <span>{t.calendar.gridMonthly}</span>
             </button>
             <button
               onClick={() => setViewMode('timeline')}
-              className={`flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-lg transition ${
+              className={`min-h-[44px] flex items-center gap-1.5 px-3.5 py-2 text-sm font-bold rounded-lg transition cursor-pointer ${
                 viewMode === 'timeline'
                   ? 'bg-white text-red-950 shadow-xs'
                   : 'text-stone-600 hover:text-stone-900'
               }`}
             >
-              <List className="w-3.5 h-3.5" />
+              <List className="w-4 h-4" />
               <span>{t.calendar.timelineFullYear}</span>
             </button>
           </div>
@@ -409,10 +409,11 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
 
       {/* Month Carousel in Grid View */}
       {viewMode === 'grid' && (
-        <div className="flex items-center justify-between bg-white px-6 py-3 rounded-2xl border border-amber-200/80 shadow-xs">
+        <div className="flex items-center justify-between bg-white px-4 sm:px-6 py-3 rounded-2xl border border-amber-200/80 shadow-xs">
           <button
             onClick={handlePrevMonth}
-            className="p-2 text-stone-700 hover:text-red-700 rounded-xl hover:bg-stone-50 transition"
+            aria-label={lang === 'vi' ? 'Tháng trước' : 'Previous month'}
+            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 text-stone-700 hover:text-red-700 rounded-xl hover:bg-stone-50 transition cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -420,13 +421,14 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
             <h2 className="text-lg font-black text-stone-900 font-serif">
               {monthNames[selectedMonth - 1]} - {targetYear}
             </h2>
-            <p className="text-[11px] text-stone-500">
+            <p className="text-base text-stone-500">
               {lang === 'vi' ? 'Quy đổi song song Âm - Dương' : 'Dual Lunar - Solar Synchronization'}
             </p>
           </div>
           <button
             onClick={handleNextMonth}
-            className="p-2 text-stone-700 hover:text-red-700 rounded-xl hover:bg-stone-50 transition"
+            aria-label={lang === 'vi' ? 'Tháng sau' : 'Next month'}
+            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 text-stone-700 hover:text-red-700 rounded-xl hover:bg-stone-50 transition cursor-pointer"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -438,7 +440,7 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
         <div className="bg-white rounded-3xl border border-amber-200/80 shadow-xs overflow-x-auto">
           <div className="min-w-[640px]">
           {/* Day of week headers */}
-          <div className="grid grid-cols-7 border-b border-stone-200 bg-amber-50/50 text-center py-2.5 text-xs font-bold text-stone-700">
+          <div className="grid grid-cols-7 border-b border-stone-200 bg-amber-50/50 text-center py-2.5 text-sm font-bold text-stone-700">
             {weekDayHeaders.map((d, idx) => (
               <span key={d} className={idx === 0 ? 'text-red-700' : ''}>
                 {d}
@@ -474,7 +476,7 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
                       {day}
                     </span>
                     <span
-                      className={`text-[10px] font-bold px-1 rounded ${
+                      className={`text-[11px] font-bold px-1 rounded ${
                         isFirstOrFifteen
                           ? 'bg-amber-500 text-stone-950 font-black'
                           : 'text-stone-500'
@@ -497,7 +499,7 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
                           key={evItem.event.id}
                           onClick={() => onSelectEvent(evItem.event)}
                           title={`${fName} (${evItem.lunarStartDateText})`}
-                          className="w-full text-left text-[10px] font-bold p-1 rounded bg-red-50 hover:bg-red-700 hover:text-white text-red-900 border border-red-200 transition truncate block"
+                          className="min-h-[44px] w-full text-left text-xs font-bold px-2 py-1.5 rounded bg-red-50 hover:bg-red-700 hover:text-white text-red-900 border border-red-200 transition truncate block cursor-pointer"
                         >
                           {fName}
                         </button>
@@ -505,7 +507,7 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
                     })}
                   </div>
 
-                  <div className="text-[9px] text-stone-500 truncate">
+                  <div className="text-[10px] text-stone-500 truncate">
                     {lunarInfo.solarTerm || ''}
                   </div>
                 </div>
@@ -530,15 +532,15 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
                 onClick={() => onSelectEvent(item.event)}
                 className="bg-white p-5 rounded-2xl border border-amber-200/80 shadow-2xs hover:shadow-md hover:border-red-300 transition cursor-pointer flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-red-700 text-amber-100 flex flex-col items-center justify-center shrink-0">
+                <div className="flex items-start sm:items-center gap-4 min-w-0">
+                  <div className="w-16 h-16 rounded-2xl bg-red-700 text-amber-100 flex flex-col items-center justify-center shrink-0">
                     <span className="text-[10px] uppercase font-bold">
                       {lang === 'vi' ? 'Dương lịch' : 'Solar'}
                     </span>
                     <span className="text-sm font-black">{item.solarStartDate}</span>
                   </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-red-800">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5 text-sm font-semibold text-red-800">
                       <span>{item.event.province}</span>
                       <span>•</span>
                       <span>
@@ -549,18 +551,18 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
                         {lang === 'vi' ? `Âm lịch: ${item.lunarStartDateText}` : `Lunar: ${item.lunarStartDateText}`}
                       </span>
                     </div>
-                    <h3 className="text-base font-black text-stone-900 font-serif">{fName}</h3>
-                    <p className="text-xs text-stone-600 line-clamp-1">{fOrigin}</p>
+                    <h3 className="text-lg font-black text-stone-900 font-serif">{fName}</h3>
+                    <p className="text-base text-stone-600 line-clamp-2">{fOrigin}</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 self-end md:self-center">
+                <div className="flex items-center gap-2 self-end md:self-center shrink-0">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       onSelectEvent(item.event);
                     }}
-                    className="px-3.5 py-1.5 bg-red-700 hover:bg-red-800 text-white font-bold text-xs rounded-xl transition"
+                    className="min-h-[44px] px-4 py-2 bg-red-700 hover:bg-red-800 text-white font-bold text-base rounded-xl transition cursor-pointer"
                   >
                     {lang === 'vi' ? 'Xem chi tiết' : 'Details'}
                   </button>
@@ -572,10 +574,10 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
       )}
 
       {/* Mandatory Disclaimer */}
-      <div className="bg-amber-50/90 border-2 border-amber-300 rounded-3xl p-5 text-amber-950 text-xs sm:text-sm leading-relaxed flex items-start gap-3">
+      <div className="bg-amber-50/90 border-2 border-amber-300 rounded-3xl p-5 text-amber-950 text-base leading-relaxed flex items-start gap-3">
         <Info className="w-6 h-6 text-amber-700 shrink-0 mt-0.5" />
         <div>
-          <h2 className="font-extrabold text-sm text-amber-900 uppercase tracking-wider mb-1">
+          <h2 className="font-extrabold text-base text-amber-900 uppercase tracking-wider mb-1">
             {lang === 'vi' ? 'Khuyến cáo pháp lý bắt buộc:' : 'Mandatory Legal Notice:'}
           </h2>
           <p>{LEGAL_DISCLAIMER}</p>

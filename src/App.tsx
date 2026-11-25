@@ -344,14 +344,14 @@ export default function App() {
       {/* Global Heritage Footer */}
       <footer className="bg-stone-950 text-stone-200 border-t-2 border-amber-600/60 mt-auto py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-stone-800 pb-6">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-stone-800 pb-6">
+            <div className="flex items-start sm:items-center gap-3">
               <DongSonLogo size={36} highContrast={a11y.highContrast} />
               <div>
                 <span className="font-serif font-black text-lg text-white">
                   Bancung<span className="text-amber-400">lehoi</span>
                 </span>
-                <p className="text-xs text-stone-400">
+                <p className="text-base text-stone-300">
                   {lang === 'vi'
                     ? 'Cổng Tra Cứu Mở Lễ Hội Truyền Thống & Di Sản Văn Hóa Việt Nam'
                     : 'Open Public Portal for Vietnamese Traditional Festivals & Cultural Heritage'}
@@ -359,53 +359,62 @@ export default function App() {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-stone-400">
+            <nav
+              aria-label={lang === 'vi' ? 'Liên kết chân trang' : 'Footer navigation'}
+              className="flex flex-wrap items-center gap-2 text-base font-semibold text-stone-200"
+            >
               <button
+                type="button"
                 onClick={() => handleNavigateTab('home')}
-                className="hover:text-amber-300 transition"
+                className="min-h-[44px] px-3 py-2 rounded-xl hover:text-amber-300 hover:bg-stone-900 transition cursor-pointer"
               >
                 {t.nav.home}
               </button>
               <button
+                type="button"
                 onClick={() => handleNavigateTab('calendar')}
-                className="hover:text-amber-300 transition"
+                className="min-h-[44px] px-3 py-2 rounded-xl hover:text-amber-300 hover:bg-stone-900 transition cursor-pointer"
               >
                 {t.nav.calendar}
               </button>
               <button
+                type="button"
                 onClick={() => handleNavigateTab('map')}
-                className="hover:text-amber-300 transition"
+                className="min-h-[44px] px-3 py-2 rounded-xl hover:text-amber-300 hover:bg-stone-900 transition cursor-pointer"
               >
                 {t.nav.map}
               </button>
               <button
+                type="button"
                 onClick={() => handleNavigateTab('community')}
-                className="hover:text-amber-300 transition"
+                className="min-h-[44px] px-3 py-2 rounded-xl hover:text-amber-300 hover:bg-stone-900 transition cursor-pointer"
               >
                 {t.nav.community}
               </button>
               <button
+                type="button"
                 onClick={() => handleNavigateTab('legal')}
-                className="hover:text-amber-300 transition"
+                className="min-h-[44px] px-3 py-2 rounded-xl text-amber-300 font-bold hover:text-amber-200 hover:bg-stone-900 border border-amber-500/40 transition cursor-pointer"
               >
                 {t.nav.legal}
               </button>
               <button
+                type="button"
                 onClick={() => handleNavigateTab('about')}
-                className="hover:text-amber-300 transition"
+                className="min-h-[44px] px-3 py-2 rounded-xl hover:text-amber-300 hover:bg-stone-900 transition cursor-pointer"
               >
                 {t.nav.about}
               </button>
-            </div>
+            </nav>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-400">
-            <p className="text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-base text-stone-300">
+            <p className="text-left">
               {lang === 'vi'
                 ? '© 2026 Bancunglehoi. Sản phẩm thực tập tốt nghiệp FPT Polytechnic & IMTA TECH.'
                 : '© 2026 Bancunglehoi. Graduation internship product of FPT Polytechnic & IMTA TECH.'}
             </p>
-            <p className="text-amber-400/90 text-center sm:text-right text-[11px] max-w-xl">
+            <p className="text-amber-400/95 text-left sm:text-right text-base max-w-xl">
               {lang === 'vi'
                 ? 'Lưu ý: Thông tin chỉ mang tính tham khảo, không thay thế văn bản pháp luật chính thức.'
                 : 'Note: Information is for reference and community education, does not replace official legal texts.'}

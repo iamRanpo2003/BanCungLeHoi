@@ -88,16 +88,16 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Main Header Bar */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-1.5 sm:gap-3">
+      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 gap-1 sm:gap-2">
           {/* Logo and Brand with Dong Son emblem */}
           <div
-            className="flex items-center gap-1.5 sm:gap-2.5 cursor-pointer select-none group shrink-0 min-w-0"
+            className="flex items-center gap-1.5 sm:gap-2 cursor-pointer select-none group shrink-0 min-w-0"
             onClick={() => handleSelectTab('home')}
             title="Về Trang chủ Bancunglehoi"
           >
             <div className="transform transition-transform group-hover:scale-105 shrink-0">
-              <DongSonLogo size={30} highContrast={a11y.highContrast} />
+              <DongSonLogo size={26} highContrast={a11y.highContrast} />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
@@ -123,15 +123,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                 placeholder={t.nav.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-amber-50/50 hover:bg-amber-50 focus:bg-white text-sm text-stone-900 placeholder-stone-500 pl-9 pr-8 py-2 rounded-xl border border-amber-200 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-100 transition-all"
+                className="w-full min-h-[44px] bg-amber-50/50 hover:bg-amber-50 focus:bg-white text-base text-stone-900 placeholder-stone-500 pl-9 pr-10 py-2 rounded-xl border border-amber-200 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-100 transition-all"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
                   aria-label="Xóa từ khóa tìm kiếm"
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-800 p-1"
+                  className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center absolute right-0.5 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-800"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-4 h-4" />
                 </button>
               )}
             </div>
@@ -146,7 +146,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => handleSelectTab(item.id)}
-                  className={`flex items-center gap-1 px-1.5 2xl:px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+                  className={`min-h-[44px] flex items-center gap-1 px-2 2xl:px-2.5 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
                     isActive
                       ? 'bg-red-50 text-red-800 shadow-2xs font-bold border border-red-200/80'
                       : 'text-stone-700 hover:text-red-800 hover:bg-amber-50/70'
@@ -160,7 +160,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </nav>
 
           {/* Right Action Bar */}
-          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             {/* Accessibility Drawer Toggle Button */}
             <button
               onClick={onToggleA11yBar}
@@ -170,13 +170,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : 'Accessibility Mode: Large text, high contrast, text-to-speech'
               }
               aria-label="Mở bảng điều khiển trợ năng"
-              className={`flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl text-xs font-bold transition border ${
+              className={`min-h-[44px] min-w-[36px] sm:min-w-[44px] flex items-center justify-center gap-1 px-2 sm:px-2.5 py-2 rounded-xl text-xs font-bold transition border cursor-pointer ${
                 isA11yBarOpen || a11y.highContrast || a11y.fontSize !== 'normal'
                   ? 'bg-amber-600 text-white border-amber-700 shadow-xs'
                   : 'bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100'
               }`}
             >
-              <Eye className="w-4 h-4" />
+              <Eye className="w-4 h-4 shrink-0" />
               <span className="hidden sm:inline">{t.nav.accessibility}</span>
             </button>
 
@@ -185,9 +185,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => onLanguageChange(lang === 'vi' ? 'en' : 'vi')}
               title={lang === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
               aria-label="Chuyển đổi ngôn ngữ"
-              className="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl text-xs font-bold bg-stone-100 text-stone-800 border border-stone-200 hover:bg-amber-50 hover:border-amber-300 transition"
+              className="min-h-[44px] min-w-[36px] sm:min-w-[44px] flex items-center justify-center gap-1 px-2 sm:px-2.5 py-2 rounded-xl text-xs font-bold bg-stone-100 text-stone-800 border border-stone-200 hover:bg-amber-50 hover:border-amber-300 transition cursor-pointer"
             >
-              <Languages className="hidden sm:block w-3.5 h-3.5 text-stone-600" />
+              <Languages className="hidden sm:block w-3.5 h-3.5 text-stone-600 shrink-0" />
               <span className="font-extrabold uppercase">{lang === 'vi' ? 'VI' : 'EN'}</span>
             </button>
 
@@ -195,11 +195,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={() => handleSelectTab('profile')}
               title={lang === 'vi' ? 'Danh sách lễ hội đã lưu & Tùy chọn cá nhân' : 'Saved festivals & Preferences'}
-              className="relative p-1.5 sm:p-2 text-stone-700 hover:text-red-700 hover:bg-red-50 rounded-xl transition"
+              aria-label={lang === 'vi' ? 'Mở lễ hội đã lưu' : 'Open saved festivals'}
+              className="min-h-[44px] min-w-[36px] sm:min-w-[44px] relative inline-flex items-center justify-center p-2 text-stone-700 hover:text-red-700 hover:bg-red-50 rounded-xl transition cursor-pointer"
             >
               <Bookmark className="w-4 h-4 sm:w-5 sm:h-5" />
               {bookmarkCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-red-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+                <span className="absolute top-0.5 right-0.5 bg-red-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
                   {bookmarkCount}
                 </span>
               )}
@@ -209,19 +210,20 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={onOpenAuth}
               title={lang === 'vi' ? 'Tùy chỉnh sở thích (Không cần đăng nhập)' : 'Preferences (No login required)'}
-              className="flex items-center gap-1.5 bg-red-700 hover:bg-red-800 active:bg-red-900 text-white text-xs font-bold px-2 sm:px-2.5 py-1.5 rounded-xl shadow-xs transition shrink-0"
+              aria-label={lang === 'vi' ? 'Tùy chỉnh hồ sơ cục bộ' : 'Open local preferences'}
+              className="min-h-[44px] min-w-[36px] sm:min-w-[44px] flex items-center justify-center gap-1.5 bg-red-700 hover:bg-red-800 active:bg-red-900 text-white text-xs font-bold px-2 sm:px-2.5 py-2 rounded-xl shadow-xs transition shrink-0 cursor-pointer"
             >
               <User className="w-4 h-4 shrink-0" />
-              <span className="hidden sm:inline max-w-[130px] truncate">{user.fullName || 'Khách tham quan'}</span>
+              <span className="hidden sm:inline max-w-[120px] truncate">{user.fullName || 'Khách tham quan'}</span>
             </button>
 
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-1.5 sm:p-2 text-stone-700 hover:text-stone-900 hover:bg-stone-100 rounded-xl xl:hidden"
+              className="min-h-[44px] min-w-[40px] inline-flex items-center justify-center p-2 text-stone-700 hover:text-stone-900 hover:bg-stone-100 rounded-xl xl:hidden cursor-pointer"
               aria-label="Mở danh mục menu"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
@@ -238,7 +240,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               placeholder={t.nav.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-amber-50/50 text-sm pl-9 pr-4 py-2.5 rounded-xl border border-amber-200 focus:outline-none focus:border-red-600"
+              className="w-full min-h-[44px] bg-amber-50/50 text-base pl-9 pr-4 py-2.5 rounded-xl border border-amber-200 focus:outline-none focus:border-red-600"
             />
           </div>
 
@@ -251,7 +253,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => handleSelectTab(item.id)}
-                  className={`flex items-center gap-2 px-2.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-left leading-tight transition ${
+                  className={`min-h-[44px] flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold text-left leading-tight transition cursor-pointer ${
                     isActive
                       ? 'bg-red-700 text-white shadow-xs font-bold'
                       : 'bg-stone-50 text-stone-700 hover:bg-amber-50'
@@ -264,14 +266,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             })}
           </div>
 
-          <div className="pt-2 border-t border-stone-100 flex items-center justify-between text-xs text-stone-700">
+          <div className="pt-2 border-t border-stone-100 flex items-center justify-between gap-2 text-base text-stone-700">
             <span>
               {lang === 'vi' ? 'Ngôn ngữ: ' : 'Language: '}
               <strong>{lang === 'vi' ? 'Tiếng Việt' : 'English'}</strong>
             </span>
             <button
               onClick={() => onLanguageChange(lang === 'vi' ? 'en' : 'vi')}
-              className="text-red-700 font-bold hover:underline"
+              className="min-h-[44px] px-3 text-red-700 font-bold hover:underline cursor-pointer"
             >
               {lang === 'vi' ? 'Switch to English' : 'Đổi sang Tiếng Việt'}
             </button>

@@ -61,7 +61,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang = 'vi', events = FEST
         <h1 className="text-2xl sm:text-4xl font-black font-serif leading-tight">
           {lang === 'vi' ? 'Về Dự Án Bancunglehoi' : 'About Bancunglehoi Project'}
         </h1>
-        <p className="text-xs sm:text-base text-amber-100 max-w-2xl leading-relaxed">
+        <p className="text-base text-amber-100 max-w-2xl leading-relaxed">
           {lang === 'vi'
             ? `Nền tảng mở (không cần đăng nhập) hỗ trợ tra cứu lịch Âm - Dương và thông tin văn hóa cho ${events.length} lễ hội, phong tục và sự kiện lịch sử tiêu biểu tại Việt Nam.`
             : `An open public portal (no login required) for researching Lunar-Solar schedules and cultural heritage for ${events.length} digitized Vietnamese festivals, customs, and historical events.`}
@@ -87,9 +87,9 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang = 'vi', events = FEST
 
           <button
             onClick={() => setIsEditing(!isEditing)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-red-800 hover:text-red-900 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl transition"
+            className="flex items-center gap-1.5 min-h-[44px] px-3.5 py-2 text-sm font-bold text-red-800 hover:text-red-900 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl transition"
           >
-            <Edit2 className="w-3.5 h-3.5" />
+            <Edit2 className="w-4 h-4 shrink-0" />
             <span>{isEditing ? (lang === 'vi' ? 'Đóng chỉnh sửa' : 'Close editing') : (lang === 'vi' ? 'Chỉnh sửa thông tin thực tập sinh' : 'Edit intern credentials')}</span>
           </button>
         </div>
@@ -173,7 +173,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang = 'vi', events = FEST
 
         {/* Edit Form */}
         {isEditing && (
-          <form onSubmit={handleSaveInfo} className="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-3 text-xs">
+          <form onSubmit={handleSaveInfo} className="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-3 text-sm">
             <h4 className="font-bold text-stone-800 uppercase">Cập nhật thông tin nộp báo cáo:</h4>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
@@ -183,7 +183,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang = 'vi', events = FEST
                   required
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full bg-white px-3 py-2 border border-stone-200 rounded-xl font-bold"
+                  className="w-full min-h-[44px] text-base bg-white px-3 py-2 border border-stone-200 rounded-xl font-bold"
                 />
               </div>
               <div>
@@ -193,7 +193,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang = 'vi', events = FEST
                   required
                   value={editId}
                   onChange={(e) => setEditId(e.target.value)}
-                  className="w-full bg-white px-3 py-2 border border-stone-200 rounded-xl font-bold"
+                  className="w-full min-h-[44px] text-base bg-white px-3 py-2 border border-stone-200 rounded-xl font-bold"
                 />
               </div>
               <div>
@@ -203,7 +203,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang = 'vi', events = FEST
                   required
                   value={editGroup}
                   onChange={(e) => setEditGroup(e.target.value)}
-                  className="w-full bg-white px-3 py-2 border border-stone-200 rounded-xl font-bold"
+                  className="w-full min-h-[44px] text-base bg-white px-3 py-2 border border-stone-200 rounded-xl font-bold"
                 />
               </div>
             </div>
@@ -211,13 +211,13 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang = 'vi', events = FEST
               <button
                 type="button"
                 onClick={() => setIsEditing(false)}
-                className="px-3 py-1.5 border border-stone-200 rounded-lg text-stone-600 font-bold"
+                className="min-h-[44px] px-4 py-2 border border-stone-200 rounded-lg text-stone-700 font-bold text-sm"
               >
                 Hủy
               </button>
               <button
                 type="submit"
-                className="px-4 py-1.5 bg-red-700 hover:bg-red-800 text-white font-bold rounded-lg shadow-xs"
+                className="min-h-[44px] px-4 py-2 bg-red-700 hover:bg-red-800 text-white font-bold text-sm rounded-lg shadow-xs"
               >
                 Lưu vào hệ thống
               </button>
@@ -229,15 +229,15 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang = 'vi', events = FEST
       {/* Project Architecture & Methodology */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-3xl border border-stone-200 shadow-xs space-y-3">
-          <div className="flex items-center gap-2 text-red-800 font-bold text-sm">
+          <div className="flex items-center gap-2 text-red-800 font-bold text-base">
             <Database className="w-5 h-5" />
             <span>{lang === 'vi' ? 'Mục Nguồn Dữ Liệu Chính Thống' : 'Official Data Sources'}</span>
           </div>
-          <ul className="text-xs sm:text-sm text-stone-700 space-y-2 leading-relaxed">
+          <ul className="text-base text-stone-700 space-y-2.5 leading-relaxed">
             {AUTHORITATIVE_SOURCES.map((src) => (
               <li key={src.id} className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <div>
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-1" />
+                <div className="min-w-0">
                   <strong>{lang === 'en' ? src.nameEn : src.name}</strong> ({src.organization})
                   {isValidPublicUrl(src.url) && (
                     <>
@@ -246,10 +246,10 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang = 'vi', events = FEST
                         href={src.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-red-800 font-semibold hover:underline"
+                        className="inline-flex items-center gap-1 text-red-800 font-semibold hover:underline break-all"
                       >
                         <span>{src.url}</span>
-                        <ExternalLink className="w-3 h-3" />
+                        <ExternalLink className="w-3.5 h-3.5 shrink-0" />
                       </a>
                     </>
                   )}
@@ -260,11 +260,11 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang = 'vi', events = FEST
         </div>
 
         <div className="bg-white p-6 rounded-3xl border border-stone-200 shadow-xs space-y-3">
-          <div className="flex items-center gap-2 text-red-800 font-bold text-sm">
+          <div className="flex items-center gap-2 text-red-800 font-bold text-base">
             <Code2 className="w-5 h-5" />
             <span>{lang === 'vi' ? 'Thuật Toán Quy Đổi & Địa Danh 2025' : 'Astronomical Engine & 2025 Geography'}</span>
           </div>
-          <p className="text-xs sm:text-sm text-stone-700 leading-relaxed">
+          <p className="text-base text-stone-700 leading-relaxed">
             {lang === 'vi'
               ? 'Hệ thống áp dụng thuật toán tính Âm lịch Việt Nam chuẩn múi giờ GMT+7 của nhà toán học Hồ Ngọc Đức dựa trên công thức cơ học thiên văn của Jean Meeus. Địa danh các tỉnh/thành đã được rà soát theo Nghị quyết 202/2025/QH15 (34 đơn vị cấp tỉnh, mô hình chính quyền 2 cấp) và ghi chú song song tên gọi trước sáp nhập.'
               : 'Uses Dr. Ho Ngoc Duc’s GMT+7 Vietnamese Lunar-Solar astronomical calculation based on Jean Meeus’s formulas. Provincial names follow Vietnam’s 2025 reorganization (Resolution 202/2025/QH15) with former names clearly preserved.'}
@@ -282,7 +282,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang = 'vi', events = FEST
               : 'Truthful Scope & Beneficiary Disclosure'}
           </h2>
         </div>
-        <ul className="text-xs sm:text-sm text-stone-700 space-y-2 leading-relaxed">
+        <ul className="text-base text-stone-700 space-y-2.5 leading-relaxed">
           <li className="flex items-start gap-2">
             <Award className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
             <span>
@@ -327,13 +327,13 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang = 'vi', events = FEST
       </section>
 
       {/* Mandatory Disclaimer */}
-      <div className="bg-amber-50/90 border-2 border-amber-300 rounded-3xl p-5 text-amber-950 text-xs sm:text-sm leading-relaxed flex items-start gap-3">
+      <div className="bg-amber-50/90 border-2 border-amber-300 rounded-3xl p-5 text-amber-950 text-base leading-relaxed flex items-start gap-3">
         <Info className="w-6 h-6 text-amber-700 shrink-0 mt-0.5" />
         <div>
           <h2 className="font-extrabold text-sm text-amber-900 uppercase tracking-wider mb-1">
             {lang === 'vi' ? 'Khuyến cáo pháp lý bắt buộc:' : 'Mandatory Legal Notice:'}
           </h2>
-          <p>{LEGAL_DISCLAIMER}</p>
+          <p className="text-base">{LEGAL_DISCLAIMER}</p>
         </div>
       </div>
     </div>

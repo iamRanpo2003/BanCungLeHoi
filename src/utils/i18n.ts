@@ -20,13 +20,9 @@ export interface TranslationDictionary {
   };
 
   hero: {
-    badge: string;
     title: string;
-    subtitle: string;
-    whatDoesTitle: string;
-    whatDoesText: string;
-    whoForTitle: string;
-    whoForText: string;
+    audienceSentence: string;
+    ctaStart: string;
     searchHint: string;
     ctaCalendar: string;
   };
@@ -115,7 +111,7 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDictionary> = {
       calendar: 'Lịch Lễ Hội',
       map: 'Bản đồ Di sản',
       community: 'Cộng đồng',
-      legal: 'Nguồn & Ghi nhận',
+      legal: 'Nguồn và Ghi nhận',
       about: 'Giới thiệu',
       admin: 'Quản trị CMS',
       searchPlaceholder: 'Tìm kiếm lễ hội, di sản...',
@@ -123,17 +119,11 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDictionary> = {
     },
 
     hero: {
-      badge: 'Cổng tra cứu mở • Công khai không cần đăng nhập',
-      title: 'Khám phá Lễ hội Truyền thống Các Dân tộc Việt Nam',
-      subtitle:
-        'Tra cứu ngày Âm – Dương chính xác của 18 lễ hội, phong tục và sự kiện lịch sử tiêu biểu khắp Việt Nam, kèm nghi thức và căn cứ pháp lý chính thống.',
-      whatDoesTitle: 'Ứng dụng này làm gì?',
-      whatDoesText:
-        'Tra cứu lịch Âm–Dương từng năm, định vị bản đồ di sản 2025, đọc nghi thức Lễ & Hội, hỏi đáp trợ lý văn hóa và xem nguồn pháp lý.',
-      whoForTitle: 'Dành cho ai?',
-      whoForText:
-        'Người dân & du khách trẩy hội, du khách quốc tế (song ngữ Việt–Anh), người cao tuổi / khiếm thị (chữ lớn, tương phản cao, đọc to) và người tìm hiểu văn hóa.',
-      searchHint: 'Nhập tên lễ hội (Hùng Vương, Gióng, Katê, Chùa Hương, Ok Om Bok...)',
+      title: 'Tra cứu ngày Âm – Dương, nghi thức và căn cứ pháp lý lễ hội truyền thống Việt Nam',
+      audienceSentence:
+        'Dành cho người dân, du khách trong và ngoài nước (song ngữ Việt – Anh), người cao tuổi hoặc khiếm thị và người tìm hiểu văn hóa.',
+      ctaStart: 'Bắt đầu dùng ngay',
+      searchHint: 'Nhập tên lễ hội, tỉnh thành, dân tộc (Hùng Vương, Gióng, Katê...)',
       ctaCalendar: 'Xem lịch',
     },
 
@@ -193,8 +183,8 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDictionary> = {
     },
 
     legal: {
-      title: 'Nguồn, Ghi Nhận & Căn Cứ Pháp Lý',
-      subtitle: 'Ghi nhận bản quyền ảnh thật, âm thanh, thuật toán, nguyên tắc tôn trọng người giữ tư liệu và văn bản pháp luật chính thống',
+      title: 'Nguồn và Ghi nhận',
+      subtitle: 'Bảng thống kê toàn bộ nguồn dữ liệu đang dùng (tên, đơn vị phát hành, năm, đường dẫn), ghi nhận người đóng góp tư liệu và căn cứ pháp lý',
     },
 
     a11y: {
@@ -220,7 +210,7 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDictionary> = {
       calendar: 'Festivals Calendar',
       map: 'Heritage Map',
       community: 'Community',
-      legal: 'Sources & Credits',
+      legal: 'Sources & Attribution',
       about: 'About Project',
       admin: 'CMS Manager',
       searchPlaceholder: 'Search festivals, heritage...',
@@ -228,17 +218,11 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDictionary> = {
     },
 
     hero: {
-      badge: 'Open Public Access • No Login Required',
-      title: 'Explore Traditional Festivals of Vietnam’s Ethnic Communities',
-      subtitle:
-        'Look up accurate Lunar–Solar dates for 18 digitized traditional festivals, customs, and historical events across Vietnam, with rituals and official legal references.',
-      whatDoesTitle: 'What this app does',
-      whatDoesText:
-        'Converts Lunar–Solar dates, locates 2025 heritage provinces on an interactive map, explains rituals, answers cultural questions, and cites legal sources.',
-      whoForTitle: 'Who it is for',
-      whoForText:
-        'Festival-goers & travelers, international visitors (VI/EN bilingual), elderly or low-vision readers (large text, high contrast, voice reader), and students.',
-      searchHint: 'Enter festival name (Hung King, Giong, Kate, Huong Pagoda, Ok Om Bok...)',
+      title: 'Look up Lunar–Solar dates, rituals, and legal records of Vietnamese traditional festivals',
+      audienceSentence:
+        'Built for local residents, domestic and international visitors (Vietnamese–English), elderly or low-vision users, and cultural learners.',
+      ctaStart: 'Start Using Now',
+      searchHint: 'Search festival name, province, or ethnic group (Hung King, Giong, Kate...)',
       ctaCalendar: 'View Calendar',
     },
 
@@ -298,8 +282,8 @@ export const TRANSLATIONS: Record<AppLanguage, TranslationDictionary> = {
     },
 
     legal: {
-      title: 'Sources, Attribution & Legal Basis',
-      subtitle: 'Credits for licensed real photography, browser audio synthesis, calendar algorithms, custodian safeguards, and official legal documents',
+      title: 'Sources & Attribution',
+      subtitle: 'Complete list of data sources (name, publisher, year, URL), contributor acknowledgments, and [CẦN BỔ SUNG] markers for unrecorded source fields',
     },
 
     a11y: {

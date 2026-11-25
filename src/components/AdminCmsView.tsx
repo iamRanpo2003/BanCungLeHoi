@@ -243,7 +243,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
               {lang === 'vi' ? 'Hệ Thống Quản Trị Nội Dung (CMS)' : 'Content Management System (CMS)'}
             </h1>
           </div>
-          <p className="text-xs sm:text-sm text-stone-500 mt-1">
+          <p className="text-base text-stone-600 mt-1">
             {lang === 'vi'
               ? 'Chế độ quản trị thử nghiệm công khai (không cần đăng nhập): kiểm duyệt bài viết và số hóa lễ hội lưu cục bộ trên trình duyệt.'
               : 'Public trial CMS (no login required): moderate submissions and digitize festivals stored locally in your browser.'}
@@ -252,27 +252,27 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
 
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-red-700 hover:bg-red-800 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-red-700/20 transition cursor-pointer"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 min-h-[44px] bg-red-700 hover:bg-red-800 text-white font-bold text-sm sm:text-base rounded-xl shadow-md shadow-red-700/20 transition cursor-pointer shrink-0"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 shrink-0" />
           <span>{lang === 'vi' ? 'Thêm mới lễ hội / sự kiện' : 'Add New Festival'}</span>
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-stone-200 pb-2">
+      <div className="flex flex-wrap gap-2 border-b border-stone-200 pb-2">
         <button
           onClick={() => setActiveTab('moderation')}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition ${
+          className={`flex items-center gap-2 px-4 py-2 min-h-[44px] text-sm font-bold rounded-xl transition ${
             activeTab === 'moderation'
               ? 'bg-red-700 text-white shadow-xs'
-              : 'bg-white text-stone-600 hover:bg-stone-50'
+              : 'bg-white text-stone-700 hover:bg-stone-50 border border-stone-200'
           }`}
         >
-          <Users className="w-4 h-4" />
+          <Users className="w-4 h-4 shrink-0" />
           <span>{lang === 'vi' ? 'Kiểm duyệt cộng đồng' : 'Community Moderation'}</span>
           {pendingStories.length > 0 && (
-            <span className="bg-amber-400 text-stone-950 px-1.5 py-0.2 rounded-full text-[10px] font-black">
+            <span className="bg-amber-400 text-stone-950 px-1.5 py-0.2 rounded-full text-xs font-black">
               {pendingStories.length}
             </span>
           )}
@@ -280,13 +280,13 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
 
         <button
           onClick={() => setActiveTab('festivals')}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition ${
+          className={`flex items-center gap-2 px-4 py-2 min-h-[44px] text-sm font-bold rounded-xl transition ${
             activeTab === 'festivals'
               ? 'bg-red-700 text-white shadow-xs'
-              : 'bg-white text-stone-600 hover:bg-stone-50'
+              : 'bg-white text-stone-700 hover:bg-stone-50 border border-stone-200'
           }`}
         >
-          <FileText className="w-4 h-4" />
+          <FileText className="w-4 h-4 shrink-0" />
           <span>{lang === 'vi' ? `Quản lý lễ hội (${events.length})` : `Manage Festivals (${events.length})`}</span>
         </button>
       </div>
@@ -305,10 +305,10 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
           {pendingStories.length === 0 ? (
             <div className="bg-white p-8 rounded-3xl border border-stone-200 text-center space-y-2">
               <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
-              <h3 className="font-bold text-stone-900">
+              <h3 className="font-bold text-stone-900 text-base">
                 {lang === 'vi' ? 'Không có bài viết nào chờ kiểm duyệt' : 'No pending submissions in queue'}
               </h3>
-              <p className="text-xs text-stone-500">
+              <p className="text-base text-stone-600">
                 {lang === 'vi'
                   ? 'Tất cả câu chuyện do cộng đồng chia sẻ đã được xử lý xong.'
                   : 'All community contributions have been reviewed.'}
@@ -329,17 +329,17 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                       <h3 className="font-extrabold text-base text-stone-900 font-serif mt-1">
                         {story.title}
                       </h3>
-                      <p className="text-xs text-stone-500">
+                      <p className="text-base text-stone-600">
                         {lang === 'vi' ? 'Tác giả:' : 'Author:'} <strong>{story.authorName}</strong> ({story.authorRole}) • Lễ hội: <strong>{story.festivalName}</strong>
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <button
                         onClick={() => handleApproveStory(story.id)}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs"
+                        className="flex items-center gap-1.5 min-h-[44px] px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm rounded-xl shadow-xs"
                       >
-                        <Check className="w-3.5 h-3.5" />
+                        <Check className="w-4 h-4" />
                         <span>{lang === 'vi' ? 'Phê duyệt xuất bản' : 'Approve'}</span>
                       </button>
                       <button
@@ -347,9 +347,9 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                           setRejectingStoryId(story.id);
                           setRejectionReason('');
                         }}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-red-700 hover:bg-red-800 text-white font-bold text-xs rounded-xl shadow-xs"
+                        className="flex items-center gap-1.5 min-h-[44px] px-3.5 py-2 bg-red-700 hover:bg-red-800 text-white font-bold text-sm rounded-xl shadow-xs"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="w-4 h-4" />
                         <span>{lang === 'vi' ? 'Từ chối' : 'Reject'}</span>
                       </button>
                     </div>
@@ -366,20 +366,20 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                             ? 'Nhập lý do từ chối (ví dụ: Thiếu nguồn xác thực)...'
                             : 'Enter rejection reason...'
                         }
-                        className="flex-1 text-xs bg-white border border-red-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-red-600"
+                        className="flex-1 min-h-[44px] text-base bg-white border border-red-200 rounded-lg px-3 py-2 focus:outline-none focus:border-red-600"
                       />
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => handleConfirmRejectStory(story.id)}
-                          className="px-3 py-1.5 bg-red-700 hover:bg-red-800 text-white text-xs font-bold rounded-lg"
+                          className="min-h-[44px] px-3.5 py-2 bg-red-700 hover:bg-red-800 text-white text-sm font-bold rounded-lg"
                         >
                           {lang === 'vi' ? 'Xác nhận từ chối' : 'Confirm Reject'}
                         </button>
                         <button
                           type="button"
                           onClick={() => setRejectingStoryId(null)}
-                          className="px-3 py-1.5 bg-white border border-stone-200 text-stone-600 text-xs font-bold rounded-lg"
+                          className="min-h-[44px] px-3.5 py-2 bg-white border border-stone-200 text-stone-700 text-sm font-bold rounded-lg"
                         >
                           {lang === 'vi' ? 'Hủy' : 'Cancel'}
                         </button>
@@ -387,7 +387,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                     </div>
                   )}
 
-                  <p className="text-xs text-stone-700 leading-relaxed bg-amber-50/40 p-3 rounded-xl border border-amber-100">
+                  <p className="text-base text-stone-700 leading-relaxed bg-amber-50/40 p-3 rounded-xl border border-amber-100">
                     {story.content}
                   </p>
                   {story.sourceReference && (
@@ -417,18 +417,18 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
       {/* Festivals List Tab */}
       {activeTab === 'festivals' && (
         <div className="bg-white p-6 rounded-3xl border border-stone-200 shadow-xs space-y-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="relative flex-1 max-w-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="relative flex-1 w-full sm:max-w-sm">
               <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder={lang === 'vi' ? 'Tìm trong danh sách quản lý...' : 'Search in festival list...'}
                 value={searchEventText}
                 onChange={(e) => setSearchEventText(e.target.value)}
-                className="w-full text-xs pl-9 pr-4 py-2 border border-stone-200 rounded-xl bg-stone-50 focus:outline-none focus:border-red-600"
+                className="w-full min-h-[44px] text-base pl-9 pr-4 py-2 border border-stone-200 rounded-xl bg-stone-50 focus:outline-none focus:border-red-600"
               />
             </div>
-            <span className="text-xs font-bold text-stone-500">
+            <span className="text-sm font-bold text-stone-600">
               {lang === 'vi' ? `Tổng số: ${filteredEvents.length} sự kiện` : `Total: ${filteredEvents.length} events`}
             </span>
           </div>
@@ -437,30 +437,31 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
             {filteredEvents.map((ev) => (
               <div
                 key={ev.id}
-                className="py-3 flex items-center justify-between gap-4 hover:bg-stone-50 px-2 rounded-xl transition"
+                className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-stone-50 px-2 rounded-xl transition"
               >
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-extrabold text-stone-900 font-serif">
+                <div className="space-y-1 min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-extrabold text-stone-900 font-serif">
                       {ev.name}
                     </span>
-                    <span className="text-[10px] bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded">
+                    <span className="text-xs bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded">
                       {ev.category}
                     </span>
-                    <span className="text-[10px] text-stone-500">
+                    <span className="text-xs text-stone-600">
                       {ev.province} • {ev.ethnicGroup}
                     </span>
                   </div>
-                  <p className="text-[11px] text-stone-500 font-mono">
+                  <p className="text-base text-stone-600 font-mono break-words">
                     ID: {ev.id} • {ev.legalBasis.documentNumber}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
                   <button
                     onClick={() => onSelectEvent(ev)}
-                    className="p-1.5 text-stone-600 hover:text-red-700 hover:bg-red-50 rounded-lg"
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center text-stone-700 hover:text-red-700 hover:bg-red-50 rounded-lg border border-stone-200 sm:border-0"
                     title={lang === 'vi' ? 'Xem chi tiết' : 'Preview'}
+                    aria-label={lang === 'vi' ? 'Xem chi tiết' : 'Preview'}
                   >
                     <Eye className="w-4 h-4" />
                   </button>
@@ -471,13 +472,13 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                           onDeleteEvent(ev.id);
                           setConfirmDeleteId(null);
                         }}
-                        className="px-2.5 py-1 bg-red-700 hover:bg-red-800 text-white text-[11px] font-bold rounded-lg"
+                        className="min-h-[44px] px-3 py-2 bg-red-700 hover:bg-red-800 text-white text-sm font-bold rounded-lg"
                       >
                         {lang === 'vi' ? 'Xác nhận xóa' : 'Confirm'}
                       </button>
                       <button
                         onClick={() => setConfirmDeleteId(null)}
-                        className="px-2 py-1 bg-stone-100 text-stone-600 text-[11px] font-bold rounded-lg"
+                        className="min-h-[44px] px-3 py-2 bg-stone-100 text-stone-700 text-sm font-bold rounded-lg"
                       >
                         {lang === 'vi' ? 'Hủy' : 'Cancel'}
                       </button>
@@ -485,8 +486,9 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                   ) : (
                     <button
                       onClick={() => setConfirmDeleteId(ev.id)}
-                      className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg"
+                      className="min-w-[44px] min-h-[44px] flex items-center justify-center text-red-700 hover:text-red-800 hover:bg-red-50 rounded-lg border border-stone-200 sm:border-0"
                       title={lang === 'vi' ? 'Xóa lễ hội' : 'Delete'}
+                      aria-label={lang === 'vi' ? 'Xóa lễ hội' : 'Delete'}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -514,13 +516,14 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
               </div>
               <button
                 onClick={() => setIsAddModalOpen(false)}
-                className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-100"
+                aria-label={lang === 'vi' ? 'Đóng' : 'Close'}
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center text-stone-500 hover:text-stone-800 rounded-lg hover:bg-stone-100"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateEvent} className="space-y-3 text-xs">
+            <form onSubmit={handleCreateEvent} className="space-y-3 text-sm">
               <div>
                 <label className="block text-stone-700 font-bold mb-1">
                   {lang === 'vi' ? 'Tên lễ hội / Sự kiện *' : 'Festival Name *'}
@@ -530,7 +533,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                   required
                   value={name}
                   onChange={(e) => handleDraftUpdate('name', e.target.value)}
-                  className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-red-600"
+                  className="w-full min-h-[44px] text-base bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-red-600"
                 />
               </div>
 
@@ -542,7 +545,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                   <select
                     value={category}
                     onChange={(e) => handleDraftUpdate('category', e.target.value as EventCategory)}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-semibold"
+                    className="w-full min-h-[44px] text-base bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-semibold"
                   >
                     <option value="Lễ hội">Lễ hội</option>
                     <option value="Sự kiện lịch sử">Sự kiện lịch sử</option>
@@ -557,7 +560,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                   <select
                     value={region}
                     onChange={(e) => handleDraftUpdate('region', e.target.value as Region)}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-semibold"
+                    className="w-full min-h-[44px] text-base bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-semibold"
                   >
                     <option value="Bắc">Bắc</option>
                     <option value="Trung">Trung</option>
@@ -574,7 +577,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                     required
                     value={ethnicGroup}
                     onChange={(e) => handleDraftUpdate('ethnicGroup', e.target.value)}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-medium"
+                    className="w-full min-h-[44px] text-base bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-medium"
                   />
                 </div>
               </div>
@@ -589,7 +592,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                     required
                     value={province}
                     onChange={(e) => handleDraftUpdate('province', e.target.value)}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-medium"
+                    className="w-full min-h-[44px] text-base bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-medium"
                   />
                 </div>
                 <div>
@@ -601,7 +604,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                     required
                     value={locationName}
                     onChange={(e) => handleDraftUpdate('locationName', e.target.value)}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-medium"
+                    className="w-full min-h-[44px] text-base bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-medium"
                   />
                 </div>
               </div>
@@ -615,7 +618,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                   rows={3}
                   value={historicalOrigin}
                   onChange={(e) => handleDraftUpdate('historicalOrigin', e.target.value)}
-                  className="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 font-medium"
+                  className="w-full text-base bg-stone-50 border border-stone-200 rounded-xl p-2.5 font-medium"
                 />
               </div>
 
@@ -628,7 +631,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                   rows={2}
                   value={culturalMeaning}
                   onChange={(e) => handleDraftUpdate('culturalMeaning', e.target.value)}
-                  className="w-full bg-stone-50 border border-stone-200 rounded-xl p-2.5 font-medium"
+                  className="w-full text-base bg-stone-50 border border-stone-200 rounded-xl p-2.5 font-medium"
                 />
               </div>
 
@@ -641,7 +644,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                     type="text"
                     value={documentNumber}
                     onChange={(e) => handleDraftUpdate('documentNumber', e.target.value)}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-medium font-mono"
+                    className="w-full min-h-[44px] text-base bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-medium font-mono"
                   />
                 </div>
                 <div>
@@ -653,7 +656,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                     placeholder="https://..."
                     value={imageUrl}
                     onChange={(e) => handleDraftUpdate('imageUrl', e.target.value)}
-                    className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-medium"
+                    className="w-full min-h-[44px] text-base bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-medium"
                   />
                 </div>
               </div>
@@ -673,7 +676,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                   }
                   value={imageSourceNote}
                   onChange={(e) => handleDraftUpdate('imageSourceNote', e.target.value)}
-                  className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-medium"
+                  className="w-full min-h-[44px] text-base bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 font-medium"
                 />
               </div>
 
@@ -716,17 +719,17 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({
                 </div>
               )}
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-stone-100">
+              <div className="flex flex-wrap justify-end gap-2 pt-3 border-t border-stone-100">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 border border-stone-200 text-stone-600 font-bold rounded-xl"
+                  className="min-h-[44px] px-4 py-2 border border-stone-200 text-stone-700 font-bold text-sm rounded-xl"
                 >
                   {lang === 'vi' ? 'Đóng' : 'Close'}
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-red-700 hover:bg-red-800 text-white font-bold rounded-xl shadow-xs cursor-pointer"
+                  className="min-h-[44px] px-5 py-2 bg-red-700 hover:bg-red-800 text-white font-bold text-sm rounded-xl shadow-xs cursor-pointer"
                 >
                   {lang === 'vi' ? 'Lưu và số hóa vào hệ thống' : 'Save & Publish'}
                 </button>
